@@ -1,7 +1,6 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function UserSideMenuBar({ user }) {
+export default function UserSideMenuBar({ user, onSignOut }) {
   const navigate = useNavigate();
 
   // Ensure user is not null
@@ -16,16 +15,16 @@ export default function UserSideMenuBar({ user }) {
 
   // Navigation links
   const navigation = [
-    { name: "Dashboard", href: "#", current: true },
-    { name: "Search Events", href: "#", current: false },
-    { name: "Chatroom", href: "#", current: false },
-    { name: "Q&A", href: "#", current: false },
+    { name: "Dashboard", href: "#" },
+    { name: "Search Events", href: "#" },
+    { name: "Chatroom", href: "#" },
+    { name: "Q&A", href: "#" },
   ];
 
-  // User navigation links (e.g., profile, sign-out)
+  // User navigation links
   const userNavigation = [
     { name: "Your Profile", href: "#" },
-    { name: "Sign out", href: "/signout" },
+    { name: "Sign out", action: onSignOut },
   ];
 
   return (
@@ -56,7 +55,7 @@ export default function UserSideMenuBar({ user }) {
         {userNavigation.map((item) => (
           <button
             key={item.name}
-            onClick={() => navigate(item.href)}
+            onClick={item.action || (() => navigate(item.href))}
             className="block px-4 py-2 w-full text-left rounded-md hover:bg-gray-700"
           >
             {item.name}

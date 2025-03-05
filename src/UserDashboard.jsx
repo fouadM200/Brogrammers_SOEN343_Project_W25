@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
+import QuitConfirmation from "./QuitConfirmation"; // Import QuitConfirmation
 
 export default function UserDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const navigate = useNavigate(); // Initialize navigation
 
   useEffect(() => {
     // Retrieve the user from localStorage
@@ -13,14 +17,14 @@ export default function UserDashboard() {
   }, []);
 
   return (
-    <div className="flex h-screen transition-all duration-300 ease-in-out">
+    <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
         className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={currentUser} />
+        <UserSideMenuBar user={currentUser} onSignOut={() => setShowConfirm(true)} />
       </div>
 
       {/* Main Content */}
@@ -35,7 +39,7 @@ export default function UserDashboard() {
           <h1 className="text-3xl font-bold">Hello, {currentUser?.name || "User"}!</h1>
           <p className="text-gray-600">Welcome to your Dashboard.</p>
           <hr className="my-2 border-gray-300" />
-          
+
           <h2 className="text-2xl font-semibold mt-6">Your Upcoming Events</h2>
           <hr className="my-2 border-gray-300" />
 
@@ -59,6 +63,19 @@ export default function UserDashboard() {
           </div>
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <QuitConfirmation
+            onConfirm={() => {
+              setShowConfirm(false);
+              navigate("/auth"); // Redirect to /auth after confirming logout
+            }}
+            onCancel={() => setShowConfirm(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

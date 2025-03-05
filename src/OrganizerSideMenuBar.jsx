@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function OrganizerSideMenuBar({ user }) {
+export default function OrganizerSideMenuBar({ user, onSignOut }) {
   const navigate = useNavigate();
 
   // Ensure user is not null
@@ -16,21 +16,16 @@ export default function OrganizerSideMenuBar({ user }) {
 
   // Main navigation links
   const navigation = [
-    { name: "Dashboard", href: "#", current: true },
-    { name: "Create new event", href: "#", current: false },
-    { name: "Analytics and Reporting", href: "#", current: false },
+    { name: "Dashboard", href: "#" },
+    { name: "Create new event", href: "#" },
+    { name: "Analytics and Reporting", href: "#" },
   ];
 
-  // User navigation links (e.g., profile, sign-out)
+  // User navigation links
   const userNavigation = [
     { name: "Your Profile", href: "#" },
-    { name: "Sign out", href: "/signout" },
+    { name: "Sign out", action: onSignOut },
   ];
-
-  // Helper function for conditional class names
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(" ");
-  }
 
   return (
     <div className="w-64 bg-gray-800 text-white flex flex-col p-4 h-full">
@@ -45,16 +40,13 @@ export default function OrganizerSideMenuBar({ user }) {
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
         {navigation.map((item) => (
-          <a
+          <button
             key={item.name}
-            href={item.href}
-            className={classNames(
-              item.current ? "bg-gray-900" : "hover:bg-gray-700",
-              "block px-4 py-2 rounded-md"
-            )}
+            onClick={() => navigate(item.href)}
+            className="block px-4 py-2 w-full text-left rounded-md hover:bg-gray-700"
           >
             {item.name}
-          </a>
+          </button>
         ))}
       </nav>
 
@@ -63,7 +55,7 @@ export default function OrganizerSideMenuBar({ user }) {
         {userNavigation.map((item) => (
           <button
             key={item.name}
-            onClick={() => navigate(item.href)}
+            onClick={item.action || (() => navigate(item.href))}
             className="block px-4 py-2 w-full text-left rounded-md hover:bg-gray-700"
           >
             {item.name}

@@ -142,7 +142,7 @@ const Homepage = () => {
       <section 
         id="home" 
         className="text-white h-screen flex flex-col justify-center items-center bg-cover bg-center"
-        style={{ backgroundImage: "url('https://ahria.ca/wp-content/uploads/2023/03/classroom-scaled.jpg')" }}
+        style={{ backgroundImage: "url('Homepage.jpg')" }}
       >
         <h2 className="text-5xl font-bold">{animatedText}</h2>
         <p className="mt-4 text-lg">Handcrafted Tailwind CSS template for your startup, business, or SaaS website.</p>
