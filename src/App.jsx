@@ -4,31 +4,32 @@ import UserDashboard from './UserDashboard';
 import OrganizerDashboard from "./OrganizerDashboard";
 import Auth from "./Auth";
 import SignOut from "./SignOut";
+import Homepage from './Homepage';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("currentUser"));
-    setCurrentUser(user); // Update state when app loads
+    setCurrentUser(user);
   }, []);
 
   const handleAuth = () => {
     const user = JSON.parse(localStorage.getItem("currentUser"));
-    setCurrentUser(user); // Update state when logging in
+    setCurrentUser(user);
   };
 
   const handleSignOut = () => {
     localStorage.removeItem("currentUser");
-    setCurrentUser(null); // Clear user state
+    setCurrentUser(null);
   };
 
   return (
     <Router>
       <Routes>
-        {/* Dynamically route based on user role */}
-        <Route
-          path="/dashboard"
+        <Route path="/" element={<Homepage />} /> {/* ✅ Set Homepage as default route */}
+        <Route 
+          path="/dashboard" 
           element={
             currentUser ? (
               currentUser.role === "organizer" ? (
@@ -39,11 +40,11 @@ const App = () => {
             ) : (
               <Navigate to="/auth" />
             )
-          }
+          } 
         />
         <Route path="/auth" element={<Auth onAuth={handleAuth} />} />
         <Route path="/signout" element={<SignOut onSignOut={handleSignOut} />} />
-        <Route path="/" element={<Navigate to={currentUser ? "/dashboard" : "/auth"} />} />
+        <Route path="/" element={<Homepage />} />
       </Routes>
     </Router>
   );
