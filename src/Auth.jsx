@@ -20,8 +20,6 @@ const Auth = ({ onAuth }) => {
     e.preventDefault();
   
     let users = JSON.parse(localStorage.getItem("users")) || [];
-  
-    // Convert entered email to lowercase for storage & comparison
     const formattedEmail = formData.email.trim().toLowerCase();
   
     if (isSignUp) {
@@ -30,13 +28,11 @@ const Auth = ({ onAuth }) => {
         return;
       }
 
-      // Ensure attendee provides a university name
       if (formData.role === "attendee" && !formData.university.trim()) {
         alert("University name is required for attendees.");
         return;
       }
   
-      // Store user with lowercase email for consistency
       users.push({ ...formData, email: formattedEmail });
       localStorage.setItem("users", JSON.stringify(users));
       alert("Sign-up successful! Please log in.");
@@ -53,24 +49,29 @@ const Auth = ({ onAuth }) => {
   
       localStorage.setItem("currentUser", JSON.stringify(user));
       onAuth();
-
-      // Redirect based on user role
-      if (user.role === "organizer") {
-        navigate("/dashboard");
-      } else if (user.role === "attendee") {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     }
   };
-  
+
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen relative">
+      {/* Home Icon - Click to go home */}
+      <div 
+  className="absolute top-4 left-4 cursor-pointer text-2xl font-bold text-black"
+  onClick={() => navigate("/")}
+>
+  Logo
+</div>
+
+
       {/* Left Section - Form */}
-      <div className="w-1/2 flex items-center justify-center bg-white">
+      <div className="w-1/2 flex items-center justify-center bg-blue-200">
+
+
         <div className="w-full max-w-md p-8">
           <div className="flex justify-center mb-4">
             {/* Logo */}
-            <span className="text-blue-600 text-3xl font-bold">🌊</span>
+            
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
             {isSignUp ? "Create an account" : "Sign in to your account"}
@@ -149,9 +150,13 @@ const Auth = ({ onAuth }) => {
               <label className="flex items-center text-gray-600 text-sm">
                 <input type="checkbox" className="mr-2" /> Remember me
               </label>
-              <span className="text-blue-600 text-sm cursor-pointer hover:underline">
-                Forgot password?
-              </span>
+              <span 
+  onClick={() => navigate("/forgot-password")} 
+  className="text-blue-600 text-sm cursor-pointer hover:underline"
+>
+  Forgot password?
+</span>
+
             </div>
 
             <button
