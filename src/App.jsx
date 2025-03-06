@@ -5,6 +5,7 @@ import OrganizerDashboard from "./OrganizerDashboard";
 import Auth from "./Auth";
 import SignOut from "./SignOut";
 import Homepage from './Homepage';
+import ForgotPassword from "./ForgotPassword";  // ✅ Import ForgotPassword page
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -44,7 +45,7 @@ const App = () => {
         />
         <Route path="/auth" element={<Auth onAuth={handleAuth} />} />
         <Route path="/signout" element={<SignOut onSignOut={handleSignOut} />} />
-        <Route path="/" element={<Homepage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* ✅ Added Forgot Password Route */}
       </Routes>
     </Router>
   );
