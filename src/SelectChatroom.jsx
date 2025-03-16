@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ Added for navigation
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
 
 const SelectChatroom = ({ user, onSignOut }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const navigate = useNavigate(); // ✅ Hook to navigate to chatroom
 
   const events = ["Event 1", "Event 2", "Event 3"];
   const speakers = ["Alice Smith", "Bob Johnson", "Charlie Lee"];
@@ -36,12 +38,15 @@ const SelectChatroom = ({ user, onSignOut }) => {
               className="flex justify-between items-center bg-white shadow-md p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200"
             >
               <div>
-                <span className="text-lg font-medium">{event}</span>
+                <span className="text-xl font-bold">{event}</span>
                 <p className="text-gray-600 text-sm">Speaker: {speakers[index]}</p>
               </div>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+              <button
+                onClick={() => navigate("/chatroom", { state: { eventName: event } })}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                >
                 Access Chatroom
-              </button>
+                </button>
             </div>
           ))}
         </div>
