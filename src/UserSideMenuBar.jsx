@@ -6,24 +6,23 @@ export default function UserSideMenuBar({ user, onSignOut }) {
   // Ensure user is not null
   const currentUser = user || { name: "Guest", email: "" };
 
-  // Extract initials
-  const nameParts = currentUser.name.trim().split(" ");
+  // Safely extract initials
+  const nameParts = currentUser?.name?.trim()?.split(" ") || ["G"];
   const initials =
     nameParts.length > 1
-      ? nameParts[0][0].toUpperCase() + nameParts[1][0].toUpperCase()
-      : nameParts[0][0].toUpperCase();
+      ? (nameParts[0][0]?.toUpperCase() || "") + (nameParts[1][0]?.toUpperCase() || "")
+      : (nameParts[0][0]?.toUpperCase() || "G");
 
   // Navigation links
   const navigation = [
-    { name: "Dashboard", href: "#" },
-    { name: "Search Events", href: "#" },
-    { name: "Chatroom", href: "#" },
-    { name: "Q&A", href: "#" },
+    { name: "Dashboard", href: "/dashboard" },
+    { name: "Search Events", href: "/search" },
+    { name: "Chatroom", href: "/select_chatroom" }
   ];
 
   // User navigation links
   const userNavigation = [
-    { name: "Your Profile", href: "#" },
+    { name: "Your Profile", href: "" },
     { name: "Sign out", action: onSignOut },
   ];
 

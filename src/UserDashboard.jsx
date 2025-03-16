@@ -5,7 +5,7 @@ import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation"; // Import QuitConfirmation
 
 export default function UserDashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate(); // Initialize navigation

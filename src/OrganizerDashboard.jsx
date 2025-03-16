@@ -5,7 +5,7 @@ import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 
 export default function OrganizerDashboard({ user }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate(); // Initialize navigation
 
