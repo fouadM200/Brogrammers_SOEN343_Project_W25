@@ -8,6 +8,7 @@ import SignOut from "./SignOut";
 import Homepage from './Homepage';
 import ForgotPassword from "./ForgotPassword"; 
 import Chatroom from "./Chatroom";
+import SearchEvents from "./SearchEvents";
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -48,8 +49,9 @@ const App = () => {
         <Route path="/auth" element={<Auth onAuth={handleAuth} />} />
         <Route path="/signout" element={<SignOut onSignOut={handleSignOut} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} /> {/* ✅ Added Forgot Password Route */}
-        <Route path="/select_chatroom" element={<SelectChatroom user={currentUser} onSignOut={handleSignOut} />} />
+        <Route path="/select_chatroom" element={<SelectChatroom user={currentUser} onSignOut={handleSignOut} />}/>
         <Route path="/chatroom" element={<Chatroom user={currentUser} onSignOut={handleSignOut} />}/>
+        <Route path="/search_events" element={<SearchEvents user={currentUser} onSignOut={handleSignOut} />}/>
         </Routes>
     </Router>
   );

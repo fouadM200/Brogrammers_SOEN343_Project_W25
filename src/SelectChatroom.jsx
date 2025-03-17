@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Added for navigation
+import { useNavigate } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
+import QuitConfirmation from "./QuitConfirmation";
 
 const SelectChatroom = ({ user, onSignOut }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const navigate = useNavigate(); // ✅ Hook to navigate to chatroom
+  const [showConfirm, setShowConfirm] = useState(false);
+  const navigate = useNavigate();
 
   const events = ["Event 1", "Event 2", "Event 3"];
   const speakers = ["Alice Smith", "Bob Johnson", "Charlie Lee"];
@@ -18,7 +20,7 @@ const SelectChatroom = ({ user, onSignOut }) => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={user} onSignOut={onSignOut} />
+        <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
       </div>
 
       {/* Main Content */}
@@ -44,13 +46,26 @@ const SelectChatroom = ({ user, onSignOut }) => {
               <button
                 onClick={() => navigate("/chatroom", { state: { eventName: event } })}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                >
+              >
                 Access Chatroom
-                </button>
+              </button>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <QuitConfirmation
+            onConfirm={() => {
+              setShowConfirm(false);
+              navigate("/auth"); // Redirect to /auth after confirming logout
+            }}
+            onCancel={() => setShowConfirm(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

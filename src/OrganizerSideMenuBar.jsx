@@ -1,8 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function OrganizerSideMenuBar({ user, onSignOut }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Ensure user is not null
   const currentUser = user || { name: "Guest", email: "" };
@@ -16,14 +17,14 @@ export default function OrganizerSideMenuBar({ user, onSignOut }) {
 
   // Main navigation links
   const navigation = [
-    { name: "Dashboard", href: "#" },
-    { name: "Create new event", href: "#" },
-    { name: "Analytics and Reporting", href: "#" },
+    { name: "Dashboard", href: "/dashboard" },
+    { name: "Create new event", href: "/create_event" },
+    { name: "Analytics and Reporting", href: "/analytics" },
   ];
 
   // User navigation links
   const userNavigation = [
-    { name: "Your Profile", href: "#" },
+    { name: "Your Profile", href: "/profile" },
     { name: "Sign out", action: onSignOut },
   ];
 
@@ -43,7 +44,11 @@ export default function OrganizerSideMenuBar({ user, onSignOut }) {
           <button
             key={item.name}
             onClick={() => navigate(item.href)}
-            className="block px-4 py-2 w-full text-left rounded-md hover:bg-gray-700"
+            className={`block px-4 py-2 w-full text-left rounded-md transition ${
+              location.pathname === item.href
+                ? "bg-white text-black"
+                : "text-white hover:bg-gray-700"
+            }`}
           >
             {item.name}
           </button>
@@ -52,15 +57,19 @@ export default function OrganizerSideMenuBar({ user, onSignOut }) {
 
       {/* User Navigation at the Bottom */}
       <div className="mt-auto border-t border-gray-700 pt-4">
-        {userNavigation.map((item) => (
-          <button
-            key={item.name}
-            onClick={item.action || (() => navigate(item.href))}
-            className="block px-4 py-2 w-full text-left rounded-md hover:bg-gray-700"
-          >
-            {item.name}
-          </button>
-        ))}
+      {userNavigation.map((item) => (
+        <button
+          key={item.name}
+          onClick={item.action || (() => navigate(item.href))}
+          className={`block px-4 py-2 w-full text-left rounded-md transition ${
+            location.pathname === item.href
+              ? "bg-white text-black"
+              : "text-white hover:bg-gray-700"
+          }`}
+        >
+          {item.name}
+        </button>
+      ))}
       </div>
     </div>
   );
