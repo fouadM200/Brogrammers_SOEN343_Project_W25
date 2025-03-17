@@ -1,10 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function UserSideMenuBar({ user, onSignOut }) {
   const navigate = useNavigate();
 
   // Ensure user is not null
   const currentUser = user || { name: "Guest", email: "" };
+  const location = useLocation();
 
   // Safely extract initials
   const nameParts = currentUser?.name?.trim()?.split(" ") || ["G"];
@@ -16,8 +17,8 @@ export default function UserSideMenuBar({ user, onSignOut }) {
   // Navigation links
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Search Events", href: "/search" },
-    { name: "Chatroom", href: "/select_chatroom" }
+    { name: "Search Events", href: "/search_events" },
+    { name: "Chatroom", href: location.pathname.startsWith("/chatroom") ? "/chatroom" : "/select_chatroom" }
   ];
 
   // User navigation links
@@ -42,7 +43,11 @@ export default function UserSideMenuBar({ user, onSignOut }) {
           <button
             key={item.name}
             onClick={() => navigate(item.href)}
-            className="block px-4 py-2 w-full text-left rounded-md hover:bg-gray-700"
+            className={`block px-4 py-2 w-full text-left rounded-md transition ${
+              location.pathname === item.href
+                ? "bg-white text-black"
+                : "text-white hover:bg-gray-700"
+            }`}
           >
             {item.name}
           </button>
@@ -51,15 +56,19 @@ export default function UserSideMenuBar({ user, onSignOut }) {
 
       {/* User Navigation at the Bottom */}
       <div className="mt-auto border-t border-gray-700 pt-4">
-        {userNavigation.map((item) => (
-          <button
-            key={item.name}
-            onClick={item.action || (() => navigate(item.href))}
-            className="block px-4 py-2 w-full text-left rounded-md hover:bg-gray-700"
-          >
-            {item.name}
-          </button>
-        ))}
+      {userNavigation.map((item) => (
+        <button
+          key={item.name}
+          onClick={item.action || (() => navigate(item.href))}
+          className={`block px-4 py-2 w-full text-left rounded-md transition ${
+            location.pathname === item.href
+              ? "bg-white text-black"
+              : "text-white hover:bg-gray-700"
+          }`}
+        >
+          {item.name}
+        </button>
+      ))}
       </div>
     </div>
   );

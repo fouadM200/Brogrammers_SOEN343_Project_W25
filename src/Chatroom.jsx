@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
+import QuitConfirmation from "./QuitConfirmation";
 import { SendHorizonal } from "lucide-react";
 
 const Chatroom = ({ user, onSignOut }) => {
@@ -11,6 +12,7 @@ const Chatroom = ({ user, onSignOut }) => {
 
   const [input, setInput] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false); 
 
   // Load messages from localStorage per event
   const loadMessages = () => {
@@ -23,7 +25,6 @@ const Chatroom = ({ user, onSignOut }) => {
 
   const [messages, setMessages] = useState(loadMessages);
 
-  // Save to localStorage whenever messages update
   useEffect(() => {
     localStorage.setItem(`messages_${eventName}`, JSON.stringify(messages));
   }, [messages, eventName]);
@@ -37,12 +38,12 @@ const Chatroom = ({ user, onSignOut }) => {
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
-      
+
       {/* Sidebar */}
       <div className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ${
         isSidebarOpen ? "translate-x-0" : "-translate-x-64"
       }`}>
-        <UserSideMenuBar user={user} onSignOut={onSignOut} />
+        <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
       </div>
 
       {/* Main Content */}
@@ -60,7 +61,7 @@ const Chatroom = ({ user, onSignOut }) => {
             &lt; Go back to Select chatroom
           </div>
           <h2 className="text-xl font-bold text-center flex-1">{eventName}</h2>
-          <div className="w-40"></div> {/* Spacer */}
+          <div className="w-40"></div>
         </div>
 
         {/* Chat Messages */}
@@ -105,6 +106,19 @@ const Chatroom = ({ user, onSignOut }) => {
           </button>
         </div>
       </div>
+
+      {/* Quit Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <QuitConfirmation
+            onConfirm={() => {
+              setShowConfirm(false);
+              navigate("/auth"); // Same as SelectChatroom
+            }}
+            onCancel={() => setShowConfirm(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };
