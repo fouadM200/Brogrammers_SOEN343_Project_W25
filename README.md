@@ -6,3 +6,27 @@ Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+# To run the Frontend Portion
+
+## First Clone the project
+
+```bash
+git clone https://github.com/fouadM200/Brogrammers_SOEN343_Project_W25
+```
+
+```bash
+cd .\Brogrammers_SOEN343_Project_W25\
+```
+
+## Install Dependencies
+
+```bash
+npm install
+```
+## Run it!
+
+```bash
+npm run dev
+```
+
