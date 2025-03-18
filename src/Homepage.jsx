@@ -130,11 +130,11 @@ const Homepage = () => {
             </button>
 
             <button 
-                onClick={() => navigate("/auth")} // Modify this route later
-                className="bg-white text-blue-900 hover:bg-gray-200 px-4 py-2 rounded transition duration-300"
-            >
-                Sign Up
+             onClick={() => navigate("/auth?signup=true")}
+             className="bg-white text-blue-900 hover:bg-gray-200 px-4 py-2 rounded transition duration-300">
+             Sign Up
             </button>
+
         </div>
         </nav>
 
