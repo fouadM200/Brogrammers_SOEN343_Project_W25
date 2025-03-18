@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Auth = ({ onAuth }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -11,6 +13,14 @@ const Auth = ({ onAuth }) => {
     role: "organizer",
     university: "", // Only applicable if role is "attendee"
   });
+
+  useEffect(() => {
+    // Check URL params to see if "signup=true" is present
+    const params = new URLSearchParams(location.search);
+    if (params.get("signup") === "true") {
+      setIsSignUp(true);
+    }
+  }, [location.search]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -57,22 +67,15 @@ const Auth = ({ onAuth }) => {
     <div className="flex h-screen relative">
       {/* Home Icon - Click to go home */}
       <div 
-  className="absolute top-4 left-4 cursor-pointer text-2xl font-bold text-black"
-  onClick={() => navigate("/")}
->
-  Logo
-</div>
-
+        className="absolute top-4 left-4 cursor-pointer text-2xl font-bold text-black"
+        onClick={() => navigate("/")}
+      >
+        Logo
+      </div>
 
       {/* Left Section - Form */}
       <div className="w-1/2 flex items-center justify-center bg-blue-200">
-
-
         <div className="w-full max-w-md p-8">
-          <div className="flex justify-center mb-4">
-            {/* Logo */}
-            
-          </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
             {isSignUp ? "Create an account" : "Sign in to your account"}
           </h2>
@@ -151,12 +154,11 @@ const Auth = ({ onAuth }) => {
                 <input type="checkbox" className="mr-2" /> Remember me
               </label>
               <span 
-  onClick={() => navigate("/forgot-password")} 
-  className="text-blue-600 text-sm cursor-pointer hover:underline"
->
-  Forgot password?
-</span>
-
+                onClick={() => navigate("/forgot-password")} 
+                className="text-blue-600 text-sm cursor-pointer hover:underline"
+              >
+                Forgot password?
+              </span>
             </div>
 
             <button
