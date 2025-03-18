@@ -10,6 +10,8 @@ import ForgotPassword from "./ForgotPassword";
 import Chatroom from "./Chatroom";
 import SearchEvents from "./SearchEvents";
 import EventDescription from "./EventDescription";
+import CreateEvent from "./CreateEvent";
+import EditEvent from "./EditEvent";
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -32,7 +34,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Homepage />} /> {/* ✅ Set Homepage as default route */}
+        <Route path="/" element={<Homepage />} />
         <Route 
           path="/dashboard" 
           element={
@@ -49,12 +51,14 @@ const App = () => {
         />
         <Route path="/auth" element={<Auth onAuth={handleAuth} />} />
         <Route path="/signout" element={<SignOut onSignOut={handleSignOut} />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* ✅ Added Forgot Password Route */}
-        <Route path="/select_chatroom" element={<SelectChatroom user={currentUser} onSignOut={handleSignOut} />}/>
-        <Route path="/chatroom" element={<Chatroom user={currentUser} onSignOut={handleSignOut} />}/>
-        <Route path="/search_events" element={<SearchEvents user={currentUser} onSignOut={handleSignOut} />}/>
-        <Route path="/event_description" element={<EventDescription user={currentUser} onSignOut={handleSignOut} />} />
-        </Routes>
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/select_chatroom" element={<SelectChatroom user={currentUser} onSignOut={handleSignOut} />} />
+        <Route path="/chatroom" element={<Chatroom user={currentUser} onSignOut={handleSignOut} />} />
+        <Route path="/search_events" element={<SearchEvents user={currentUser} />} />
+        <Route path="/event_description" element={<EventDescription user={currentUser} />} />
+        <Route path="/create_event" element={<CreateEvent user={currentUser} />} />
+        <Route path="/edit_event" element={<EditEvent />} />
+      </Routes>
     </Router>
   );
 };
