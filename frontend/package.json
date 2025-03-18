@@ -23,11 +23,13 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.483.0",
     "mongoose": "^6.13.3",
     "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
+    "swiper": "^11.2.5",
     "tailwindcss": "^3.4.13",
     "winston": "^3.17.0"
   },

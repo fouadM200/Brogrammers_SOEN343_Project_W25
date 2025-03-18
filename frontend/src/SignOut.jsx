@@ -1,3 +1,4 @@
+// src/SignOut.jsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -5,9 +6,15 @@ export default function SignOut({ onSignOut }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    localStorage.removeItem("currentUser"); // Remove from storage
-    onSignOut(); // Update React state
-    navigate("/auth"); // Redirect to login page
+    // Remove token & user from localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentUser");
+
+    // Let App know we've signed out
+    onSignOut();
+
+    // Redirect to login
+    navigate("/auth");
   }, [navigate, onSignOut]);
 
   return (
