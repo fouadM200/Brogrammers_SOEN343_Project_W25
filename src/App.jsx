@@ -9,6 +9,7 @@ import Homepage from './Homepage';
 import ForgotPassword from "./ForgotPassword"; 
 import Chatroom from "./Chatroom";
 import SearchEvents from "./SearchEvents";
+import EventDescription from "./EventDescription";
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -52,6 +53,7 @@ const App = () => {
         <Route path="/select_chatroom" element={<SelectChatroom user={currentUser} onSignOut={handleSignOut} />}/>
         <Route path="/chatroom" element={<Chatroom user={currentUser} onSignOut={handleSignOut} />}/>
         <Route path="/search_events" element={<SearchEvents user={currentUser} onSignOut={handleSignOut} />}/>
+        <Route path="/event_description" element={<EventDescription user={currentUser} onSignOut={handleSignOut} />} />
         </Routes>
     </Router>
   );

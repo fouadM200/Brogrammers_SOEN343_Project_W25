@@ -44,10 +44,11 @@ export default function UserSideMenuBar({ user, onSignOut }) {
             key={item.name}
             onClick={() => navigate(item.href)}
             className={`block px-4 py-2 w-full text-left rounded-md transition ${
+              (item.href === "/search_events" && ["/search_events", "/event_description"].includes(location.pathname)) ||
               location.pathname === item.href
                 ? "bg-white text-black"
                 : "text-white hover:bg-gray-700"
-            }`}
+            }`}            
           >
             {item.name}
           </button>
