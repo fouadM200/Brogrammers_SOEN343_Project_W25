@@ -219,7 +219,7 @@ const SearchEvents = ({ user, onSignOut }) => {
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
-              onSignOut();
+              navigate("/auth"); // Redirect to /auth after confirming logout
             }}
             onCancel={() => setShowConfirm(false)}
           />
