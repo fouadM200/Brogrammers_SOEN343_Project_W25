@@ -19,6 +19,10 @@ git clone https://github.com/fouadM200/Brogrammers_SOEN343_Project_W25
 cd .\Brogrammers_SOEN343_Project_W25\
 ```
 
+```bash
+cd frontend
+```
+
 ## Install Dependencies
 
 ```bash
@@ -34,4 +38,20 @@ npm install lucide-react swiper
 ```bash
 npm run dev
 ```
+# To run the Backend Portion
 
+```bash
+cd backend
+```
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+## Run it!
+
+```bash
+node server.js
+```
