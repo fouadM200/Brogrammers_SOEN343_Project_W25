@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import OrganizerSideMenuBar from "./OrganizerSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
+import DeleteEvent from "./DeleteEvent";
+import EventDeleteSuccess from "./EventDeleteSuccess";
 
 export default function OrganizerDashboard({ user }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const [events, setEvents] = useState([]);
-  const navigate = useNavigate(); // Initialize navigation
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
@@ -19,6 +24,14 @@ export default function OrganizerDashboard({ user }) {
     const updatedEvents = events.filter(event => event.title !== eventTitle);
     setEvents(updatedEvents);
     localStorage.setItem("events", JSON.stringify(updatedEvents));
+    setShowDeleteSuccess(true);
+  };
+
+  const formatTime12Hour = (time24) => {
+    const [hour, minute] = time24.split(":");
+    const date = new Date();
+    date.setHours(parseInt(hour), parseInt(minute));
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
   return (
@@ -44,7 +57,7 @@ export default function OrganizerDashboard({ user }) {
           <h1 className="text-3xl font-bold">Hello, {user?.name || "-- user first name --"}!</h1>
           <p className="text-gray-600">Welcome to your Dashboard.</p>
           <hr className="my-2 border-gray-300" />
-          
+
           <h2 className="text-2xl font-semibold mt-6">Your Events</h2>
           <hr className="my-2 border-gray-300" />
 
@@ -54,22 +67,34 @@ export default function OrganizerDashboard({ user }) {
           ) : (
             <div className="mt-4">
               {events.map((event, index) => (
-                <div key={index} className="p-4 bg-white shadow-md rounded-lg mb-3 flex justify-between items-center">
+                <div
+                  key={index}
+                  className="p-4 bg-white shadow-md rounded-lg mb-3 flex justify-between items-center hover:shadow-lg hover:bg-gray-50 transition duration-200"
+                >
                   <div>
                     <h3 className="text-lg font-semibold">{event.title}</h3>
                     <p className="text-gray-500">Speaker: {event.speaker}</p>
                     <p className="text-gray-500">Date: {event.date}</p>
+                    <p className="text-gray-500">
+                      Time: {formatTime12Hour(event.startTime)} - {formatTime12Hour(event.endTime)}
+                    </p>
+                    <p className="text-gray-500">
+                      Mode: {event.mode} {event.mode !== "online" && event.room ? `| Room: ${event.room}` : ""}
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => navigate("/edit_event", { state: { event } })}
-                      className="px-4 py-2 bg-yellow-500 text-white rounded-md"
+                      onClick={() => navigate("/edit_event", { state: { event, user } })}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(event.title)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-md"
+                      onClick={() => {
+                        setEventToDelete(event);
+                        setShowDeleteModal(true);
+                      }}
+                      className="px-4 py-2 bg-gray-800 text-white rounded-md"
                     >
                       Delete
                     </button>
@@ -87,11 +112,37 @@ export default function OrganizerDashboard({ user }) {
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
-              navigate("/auth"); // Redirect to /auth after confirming logout
+              navigate("/auth");
             }}
             onCancel={() => setShowConfirm(false)}
           />
         </div>
+      )}
+
+      {/* Delete Event Confirmation Modal */}
+      {showDeleteModal && eventToDelete && (
+        <DeleteEvent
+          eventName={eventToDelete.title}
+          onConfirm={() => {
+            handleDelete(eventToDelete.title);
+            setShowDeleteModal(false);
+          }}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setEventToDelete(null);
+          }}
+        />
+      )}
+
+      {/* Delete Event Success Overlay */}
+      {showDeleteSuccess && eventToDelete && (
+        <EventDeleteSuccess
+          eventName={eventToDelete.title}
+          onOk={() => {
+            setShowDeleteSuccess(false);
+            setEventToDelete(null);
+          }}
+        />
       )}
     </div>
   );
