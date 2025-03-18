@@ -24,6 +24,11 @@ cd .\Brogrammers_SOEN343_Project_W25\
 ```bash
 npm install
 ```
+
+```bash
+npm install lucide-react swiper
+```
+
 ## Run it!
 
 ```bash
