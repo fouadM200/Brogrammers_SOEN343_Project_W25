@@ -55,3 +55,4 @@ npm install
 ```bash
 node server.js
 ```
+## Don't forget to create a .env file in the backend folder for the MongoDB URI connection. File is on discord
