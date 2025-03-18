@@ -65,4 +65,52 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Returns all events created by the logged-in organizer
+router.get("/my-events", authMiddleware, async (req, res) => {
+    try {
+      const { userId } = req.user;
+  
+      // Ensure the user is an organizer (optional check)
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      if (user.role !== "organizer") {
+        return res.status(403).json({ error: "Only organizers can view their events" });
+      }
+  
+      // Find events by this organizer
+      const events = await Event.find({ organizerId: userId }).sort({ date: 1 });
+      return res.json(events);
+    } catch (error) {
+      console.error("Get my events error:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+
+router.delete("/:id", authMiddleware, async (req, res) => {
+    try {
+      const { userId } = req.user;
+      const eventId = req.params.id;
+  
+      // Find the event
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+  
+      // Ensure this event belongs to the organizer
+      if (event.organizerId.toString() !== userId) {
+        return res.status(403).json({ error: "You cannot delete this event" });
+      }
+  
+      await event.deleteOne();
+      return res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      console.error("Delete event error:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
 module.exports = router;
