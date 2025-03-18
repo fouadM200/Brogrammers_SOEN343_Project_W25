@@ -1,4 +1,3 @@
-// ✅ SearchEvents.jsx (UPDATED to preserve search term and results)
 import React, { useState, useEffect } from "react";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -12,60 +11,24 @@ const SearchEvents = ({ user, onSignOut }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Restore previous state from location
+  // Restore previous search state
   const { previousSearchTerm = "", previousSearchTriggered = false } = location.state || {};
-
   const [searchTerm, setSearchTerm] = useState(previousSearchTerm);
   const [searchTriggered, setSearchTriggered] = useState(previousSearchTriggered);
+  const [events, setEvents] = useState([]);
 
-  const suggestedEvents = [
-    {
-      title: "Tech Conference 2025",
-      speaker: "Jane Smith",
-      date: "March 20, 2025",
-      time: "9:00 AM - 1:00 PM"
-    },
-    {
-      title: "Startup Pitch Day",
-      speaker: "Mark Johnson",
-      date: "April 2, 2025",
-      time: "11:00 AM - 3:00 PM"
-    },
-    {
-      title: "Design Bootcamp",
-      speaker: "Emily Wong",
-      date: "May 10, 2025",
-      time: "10:00 AM - 2:00 PM"
-    }
-  ];
-
-  const aiEvents = [
-    {
-      title: "AI in Education",
-      speaker: "Dr. Amina Karim",
-      date: "May 5, 2025",
-      time: "1:00 PM - 4:00 PM"
-    },
-    {
-      title: "Future of AI",
-      speaker: "Alex Chen",
-      date: "June 12, 2025",
-      time: "3:00 PM - 6:00 PM"
-    },
-    {
-      title: "Ethics in AI",
-      speaker: "Nina Patel",
-      date: "July 8, 2025",
-      time: "2:00 PM - 5:00 PM"
-    }
-  ];
+  useEffect(() => {
+    const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
+    setEvents(storedEvents);
+  }, []);
 
   const handleSearch = () => {
     setSearchTriggered(true);
   };
 
-  const isAIQuery = searchTerm.trim().toLowerCase() === "ai";
-  const noResults = searchTriggered && !isAIQuery && searchTerm.trim().length > 0;
+  const filteredEvents = events.filter(event =>
+    event.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
@@ -110,104 +73,99 @@ const SearchEvents = ({ user, onSignOut }) => {
 
           <div className="mt-8">
             <h2 className="text-2xl font-semibold text-black">
-              {searchTriggered ? "Search Results" : "Suggested Events"}
+              {searchTriggered ? "Search Results" : "Available Events"}
             </h2>
             <hr className="my-2 border-gray-300" />
 
             <div className="grid grid-cols-1 gap-4">
               {searchTriggered ? (
-                isAIQuery ? (
-                  aiEvents.map((event, index) => (
+                filteredEvents.length > 0 ? (
+                  filteredEvents.map((event, index) => (
                     <div
                       key={index}
-                      className="bg-white p-6 shadow-md rounded-lg transition-all duration-500 ease-out transform opacity-0 animate-fade-in"
-                      style={{
-                        animationDelay: `${index * 200}ms`,
-                        animationFillMode: "forwards",
-                        animationDuration: "0.5s"
-                      }}
+                      className="bg-white p-6 shadow-md rounded-lg transition duration-300 hover:bg-gray-100 flex justify-between items-center"
                     >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-lg font-semibold">{event.title}</h3>
-                          <p className="text-gray-500">Speaker: {event.speaker}</p>
-                          <p className="text-gray-500">Date: {event.date}</p>
-                          <p className="text-gray-500">Time: {event.time}</p>
-                        </div>
-                        <button
-                          onClick={() =>
-                            navigate("/event_description", {
-                              state: {
-                                event: {
-                                  title: event.title,
-                                  speaker: event.speaker,
-                                  date: event.date,
-                                  time: event.time,
-                                  mode: event.mode || "Online",
-                                  room: event.room || "N/A",
-                                  description:
-                                    event.description ||
-                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                },
-                                searchState: {
-                                  previousSearchTerm: searchTerm,
-                                  previousSearchTriggered: true
-                                }
-                              }
-                            })
-                          }
-                          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                        >
-                          Select Event
-                        </button>
+                      <div>
+                        <h3 className="text-lg font-semibold">{event.title}</h3>
+                        <p className="text-gray-500">Speaker: {event.speaker}</p>
+                        <p className="text-gray-500">Date: {event.date}</p>
+                        <p className="text-gray-500">Time: {event.time}</p>
                       </div>
+                      <button
+                        onClick={() =>
+                          navigate("/event_description", {
+                            state: {
+                              event: {
+                                title: event.title,
+                                speaker: event.speaker,
+                                date: event.date,
+                                time: event.time,
+                                mode: event.mode || "Online",
+                                room: event.room || "N/A",
+                                description:
+                                  event.description ||
+                                  "No description available."
+                              },
+                              searchState: {
+                                previousSearchTerm: searchTerm,
+                                previousSearchTriggered: searchTriggered
+                              }
+                            }
+                          })
+                        }
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                      >
+                        View Details
+                      </button>
                     </div>
                   ))
                 ) : (
-                  noResults && (
-                    <p className="text-gray-500 text-md mt-2">No events found.</p>
-                  )
+                  <p className="text-gray-500 text-md mt-2">No events found.</p>
                 )
               ) : (
-                suggestedEvents.map((event, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-6 shadow-md rounded-lg transition duration-300 hover:bg-gray-100 flex justify-between items-center"
-                  >
-                    <div>
-                      <h3 className="text-lg font-semibold">{event.title}</h3>
-                      <p className="text-gray-500">Speaker: {event.speaker}</p>
-                      <p className="text-gray-500">Date: {event.date}</p>
-                      <p className="text-gray-500">Time: {event.time}</p>
-                    </div>
-                    <button
-                      onClick={() =>
-                        navigate("/event_description", {
-                          state: {
-                            event: {
-                              title: event.title,
-                              speaker: event.speaker,
-                              date: event.date,
-                              time: event.time,
-                              mode: event.mode || "Online",
-                              room: event.room || "N/A",
-                              description:
-                                event.description ||
-                                "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                            },
-                            searchState: {
-                              previousSearchTerm: searchTerm,
-                              previousSearchTriggered: searchTriggered
-                            }
-                          }
-                        })
-                      }
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                events.length > 0 ? (
+                  events.map((event, index) => (
+                    <div
+                      key={index}
+                      className="bg-white p-6 shadow-md rounded-lg transition duration-300 hover:bg-gray-100 flex justify-between items-center"
                     >
-                      Select Event
-                    </button>
-                  </div>
-                ))
+                      <div>
+                        <h3 className="text-lg font-semibold">{event.title}</h3>
+                        <p className="text-gray-500">Speaker: {event.speaker}</p>
+                        <p className="text-gray-500">Date: {event.date}</p>
+                        <p className="text-gray-500">Time: {event.time}</p>
+                      </div>
+                      <button
+                        onClick={() =>
+                          navigate("/event_description", {
+                            state: {
+                              event: {
+                                title: event.title,
+                                speaker: event.speaker,
+                                date: event.date,
+                                time: event.time,
+                                mode: event.mode || "Online",
+                                room: event.room || "N/A",
+                                description:
+                                  event.description ||
+                                  "No description available."
+                              },
+                              searchState: {
+                                previousSearchTerm: searchTerm,
+                                previousSearchTriggered: searchTriggered
+                              }
+                            }
+                          })
+                        }
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-md mt-2">No events available.</p>
+                )
               )}
             </div>
           </div>
@@ -219,7 +177,7 @@ const SearchEvents = ({ user, onSignOut }) => {
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
-              navigate("/auth"); // Redirect to /auth after confirming logout
+              navigate("/auth");
             }}
             onCancel={() => setShowConfirm(false)}
           />
