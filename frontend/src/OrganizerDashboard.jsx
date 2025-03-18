@@ -1,3 +1,4 @@
+// src/OrganizerDashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import OrganizerSideMenuBar from "./OrganizerSideMenuBar";
@@ -9,29 +10,80 @@ import EventDeleteSuccess from "./EventDeleteSuccess";
 export default function OrganizerDashboard({ user }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // For events data
   const [events, setEvents] = useState([]);
+
+  // For delete modal logic
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+
   const navigate = useNavigate();
 
+  // 1) Fetch "my events" from the backend on mount
   useEffect(() => {
-    const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
-    setEvents(storedEvents);
+    const fetchMyEvents = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          // Not logged in, or not an organizer
+          return;
+        }
+
+        const res = await fetch("http://localhost:5000/api/events/my-events", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          // Could handle errors here
+          console.error("Failed to fetch organizer events");
+          return;
+        }
+
+        const data = await res.json();
+        setEvents(data);
+      } catch (error) {
+        console.error("Error fetching organizer events:", error);
+      }
+    };
+
+    fetchMyEvents();
   }, []);
 
-  const handleDelete = (eventTitle) => {
-    const updatedEvents = events.filter(event => event.title !== eventTitle);
-    setEvents(updatedEvents);
-    localStorage.setItem("events", JSON.stringify(updatedEvents));
-    setShowDeleteSuccess(true);
+  // 2) Delete an event (optional)
+  const handleDelete = async (eventId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        console.error("Failed to delete event");
+        return;
+      }
+
+      // Remove from state
+      setEvents((prev) => prev.filter((ev) => ev._id !== eventId));
+      setShowDeleteSuccess(true);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
   };
 
+  // 3) Format times (optional)
   const formatTime12Hour = (time24) => {
+    if (!time24 || time24 === "N/A") return "N/A";
     const [hour, minute] = time24.split(":");
     const date = new Date();
-    date.setHours(parseInt(hour), parseInt(minute));
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    date.setHours(parseInt(hour, 10), parseInt(minute, 10));
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
   };
 
   return (
@@ -61,25 +113,28 @@ export default function OrganizerDashboard({ user }) {
           <h2 className="text-2xl font-semibold mt-6">Your Events</h2>
           <hr className="my-2 border-gray-300" />
 
-          {/* Events List */}
+          {/* 4) Display the events fetched from the server */}
           {events.length === 0 ? (
             <p className="text-gray-500">No events created yet.</p>
           ) : (
             <div className="mt-4">
-              {events.map((event, index) => (
+              {events.map((event) => (
                 <div
-                  key={index}
+                  key={event._id}
                   className="p-4 bg-white shadow-md rounded-lg mb-3 flex justify-between items-center hover:shadow-lg hover:bg-gray-50 transition duration-200"
                 >
                   <div>
                     <h3 className="text-lg font-semibold">{event.title}</h3>
                     <p className="text-gray-500">Speaker: {event.speaker}</p>
-                    <p className="text-gray-500">Date: {event.date}</p>
+                    <p className="text-gray-500">
+                      Date: {new Date(event.date).toLocaleDateString()}
+                    </p>
                     <p className="text-gray-500">
                       Time: {formatTime12Hour(event.startTime)} - {formatTime12Hour(event.endTime)}
                     </p>
                     <p className="text-gray-500">
-                      Mode: {event.mode} {event.mode !== "online" && event.room ? `| Room: ${event.room}` : ""}
+                      Mode: {event.mode}{" "}
+                      {event.mode !== "online" && event.room ? `| Room: ${event.room}` : ""}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -124,7 +179,7 @@ export default function OrganizerDashboard({ user }) {
         <DeleteEvent
           eventName={eventToDelete.title}
           onConfirm={() => {
-            handleDelete(eventToDelete.title);
+            handleDelete(eventToDelete._id);
             setShowDeleteModal(false);
           }}
           onCancel={() => {

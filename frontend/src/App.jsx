@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import SelectChatroom from "./SelectChatroom"; 
@@ -16,17 +17,29 @@ import EditEvent from "./EditEvent";
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
+  // Check for token + user in localStorage on mount
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("currentUser"));
-    setCurrentUser(user);
+    if (token && user) {
+      setCurrentUser(user);
+    } else {
+      setCurrentUser(null);
+    }
   }, []);
 
+  // Called after successful login/registration
   const handleAuth = () => {
+    const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("currentUser"));
-    setCurrentUser(user);
+    if (token && user) {
+      setCurrentUser(user);
+    }
   };
 
+  // Called on sign out
   const handleSignOut = () => {
+    localStorage.removeItem("token");
     localStorage.removeItem("currentUser");
     setCurrentUser(null);
   };
@@ -35,6 +48,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Homepage />} />
+
         <Route 
           path="/dashboard" 
           element={
@@ -47,8 +61,9 @@ const App = () => {
             ) : (
               <Navigate to="/auth" />
             )
-          } 
+          }
         />
+
         <Route path="/auth" element={<Auth onAuth={handleAuth} />} />
         <Route path="/signout" element={<SignOut onSignOut={handleSignOut} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

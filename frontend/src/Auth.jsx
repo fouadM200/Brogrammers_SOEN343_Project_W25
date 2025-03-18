@@ -1,3 +1,4 @@
+// src/Auth.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -11,7 +12,7 @@ const Auth = ({ onAuth }) => {
     email: "",
     password: "",
     role: "organizer",
-    university: "", // Only applicable if role is "attendee"
+    university: "",
   });
 
   useEffect(() => {
@@ -26,40 +27,65 @@ const Auth = ({ onAuth }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-    const formattedEmail = formData.email.trim().toLowerCase();
-  
-    if (isSignUp) {
-      if (users.some((user) => user.email.toLowerCase() === formattedEmail)) {
-        alert("Email already exists! Please login.");
-        return;
-      }
+    try {
+      if (isSignUp) {
+        // === Register flow ===
+        const res = await fetch("http://localhost:5000/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email.trim().toLowerCase(),
+            password: formData.password,
+            role: formData.role,
+            university: formData.role === "attendee" ? formData.university : "",
+          }),
+        });
 
-      if (formData.role === "attendee" && !formData.university.trim()) {
-        alert("University name is required for attendees.");
-        return;
+        if (!res.ok) {
+          const errData = await res.json();
+          alert(errData.error || "Registration failed.");
+          return;
+        }
+
+        alert("Sign-up successful! Please log in.");
+        setIsSignUp(false);
+
+      } else {
+        // === Login flow ===
+        const res = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email.trim().toLowerCase(),
+            password: formData.password,
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          alert(errData.error || "Login failed.");
+          return;
+        }
+
+        // On success: we get { message, token, user }
+        const data = await res.json();
+
+        // Save token & user in localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("currentUser", JSON.stringify(data.user));
+
+        // Let parent know we are authenticated
+        onAuth();
+
+        // Navigate to dashboard
+        navigate("/dashboard");
       }
-  
-      users.push({ ...formData, email: formattedEmail });
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Sign-up successful! Please log in.");
-      setIsSignUp(false);
-    } else {
-      const user = users.find(
-        (u) => u.email.toLowerCase() === formattedEmail && u.password === formData.password
-      );
-  
-      if (!user) {
-        alert("Invalid email or password!");
-        return;
-      }
-  
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      onAuth();
-      navigate("/dashboard");
+    } catch (error) {
+      console.error("Auth error:", error);
+      alert("Something went wrong. Please try again.");
     }
   };
 
