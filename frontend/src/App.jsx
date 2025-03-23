@@ -13,6 +13,7 @@ import SearchEvents from "./SearchEvents";
 import EventDescription from "./EventDescription";
 import CreateEvent from "./CreateEvent";
 import EditEvent from "./EditEvent";
+import OnlineEventAccess from './OnlineEventAccess';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -72,6 +73,7 @@ const App = () => {
         <Route path="/search_events" element={<SearchEvents user={currentUser} />} />
         <Route path="/event_description" element={<EventDescription user={currentUser} />} />
         <Route path="/create_event" element={<CreateEvent user={currentUser} />} />
+        <Route path="/online_event_access" element={<OnlineEventAccess />} />
         <Route path="/edit_event" element={<EditEvent />} />
       </Routes>
     </Router>

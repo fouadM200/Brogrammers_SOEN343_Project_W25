@@ -77,7 +77,7 @@ export default function OrganizerDashboard({ user }) {
     }
   };
 
-  // 3) Format times (optional)
+  // Format times 
   const formatTime12Hour = (time24) => {
     if (!time24 || time24 === "N/A") return "N/A";
     const [hour, minute] = time24.split(":");
@@ -110,7 +110,7 @@ export default function OrganizerDashboard({ user }) {
           <p className="text-gray-600">Welcome to your Dashboard.</p>
           <hr className="my-2 border-gray-300" />
 
-          <h2 className="text-2xl font-semibold mt-6">Your Events</h2>
+          <h2 className="text-2xl font-semibold mt-6">Upcoming Events</h2>
           <hr className="my-2 border-gray-300" />
 
           {/* 4) Display the events fetched from the server */}

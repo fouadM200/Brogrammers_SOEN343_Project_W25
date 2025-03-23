@@ -104,15 +104,15 @@ const CreateEvent = ({ user }) => {
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
-      <div className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"}`}>
+      <div className={`fixed top-0 left-0 min-h-screen w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"}`}>
         <OrganizerSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
       </div>
 
       {/* Main Content */}
       <div className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <div className="p-6">
-          <h1 className="text-3xl font-bold text-left mb-2">Create a New Event</h1>
+        <div className="p-6 min-h-screen bg-gray-100">
+        <h1 className="text-3xl font-bold text-left mb-2">Create a New Event</h1>
           <hr className="border-gray-300 mb-6" />
           <div className="w-full max-w-5xl">
             {/* Title & Speaker */}
@@ -148,9 +148,9 @@ const CreateEvent = ({ user }) => {
               <div>
                 <label className="block mb-1 font-medium">Event Mode:</label>
                 <select name="mode" value={eventDetails.mode} onChange={handleChange} className="p-3 border rounded w-full">
-                  <option value="online">Online</option>
-                  <option value="in-person">In-Person</option>
-                  <option value="hybrid">Hybrid</option>
+                  <option value="Online">Online</option>
+                  <option value="In-person">In-Person</option>
+                  <option value="Hybrid">Hybrid</option>
                 </select>
               </div>
               <div>
@@ -173,8 +173,8 @@ const CreateEvent = ({ user }) => {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block mb-1 text-sm">Regular Attendee:</label>
-                  <input type="text" name="regular" value={eventDetails.registration.regular} onChange={handleChange} className="p-3 border rounded w-full" />
-                </div>
+                  <input type="text" inputMode="decimal" pattern="^\d+(\.\d{0,2})?$" name="regular" value={eventDetails.registration.regular} onChange={handleChange} onBlur={(e) => !isNaN(parseFloat(e.target.value)) && setEventDetails(prev => ({ ...prev, registration: { ...prev.registration, regular: parseFloat(e.target.value).toFixed(2) } }))} className="p-3 border rounded w-full" />
+                  </div>
                 <div>
                   <label className="block mb-1 text-sm">Other University Students:</label>
                   <input type="text" name="otherStudents" value={eventDetails.registration.otherStudents} readOnly className="p-3 border rounded w-full bg-gray-50 text-gray-700 cursor-not-allowed" />

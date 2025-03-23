@@ -29,8 +29,8 @@ export default function OrganizerSideMenuBar({ user, onSignOut }) {
   ];
 
   return (
-    <div className="w-64 bg-gray-800 text-white flex flex-col p-4 h-full">
-      {/* Profile Section */}
+    <div className="w-64 bg-gray-800 text-white flex flex-col p-4 min-h-screen">
+    {/* Profile Section */}
       <div className="flex flex-col items-center mb-6">
         <div className="w-16 h-16 bg-blue-500 text-white flex items-center justify-center rounded-full text-xl font-bold">
           {initials}

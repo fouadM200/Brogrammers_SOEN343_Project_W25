@@ -104,7 +104,7 @@ const EventDescription = ({ user, onSignOut }) => {
             {currentEvent.registration?.regular ? `${currentEvent.registration.regular} $CAD` : "Not Set"}
          </span>
          <span>{currentEvent.registration?.otherStudents || "Not Set"} $CAD</span>
-         <span className="text-red-500 font-semibold">(30% discount)</span>
+         <span className="text-red-500 font-semibold"> (30% discount)</span>
        </li>
         <li>
       <strong>Concordia Students:</strong>{" "}
@@ -136,7 +136,7 @@ const EventDescription = ({ user, onSignOut }) => {
               onClick={() => alert("Registration feature coming soon! 😉")}
               className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition"
             >
-              Register
+              Register & Pay
             </button>
           </div>
         </div>
