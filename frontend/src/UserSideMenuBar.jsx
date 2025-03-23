@@ -16,7 +16,7 @@ export default function UserSideMenuBar({ user, onSignOut }) {
 
   // Navigation links
   const navigation = [
-    { name: "Dashboard", href: "/dashboard" },
+    { name: "Dashboard", href: ["/dashboard", "/online_event_access"] },
     { name: "Search Events", href: "/search_events" },
     { name: "Chatroom", href: location.pathname.startsWith("/chatroom") ? "/chatroom" : "/select_chatroom" }
   ];
@@ -39,20 +39,19 @@ export default function UserSideMenuBar({ user, onSignOut }) {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
-        {navigation.map((item) => (
-          <button
-            key={item.name}
-            onClick={() => navigate(item.href)}
-            className={`block px-4 py-2 w-full text-left rounded-md transition ${
-              (item.href === "/search_events" && ["/search_events", "/event_description"].includes(location.pathname)) ||
-              location.pathname === item.href
-                ? "bg-white text-black"
-                : "text-white hover:bg-gray-700"
-            }`}            
-          >
-            {item.name}
-          </button>
-        ))}
+      {navigation.map((item) => (
+        <button
+          key={item.name}
+          onClick={() => navigate(Array.isArray(item.href) ? item.href[0] : item.href)}
+          className={`block px-4 py-2 w-full text-left rounded-md transition ${
+            (Array.isArray(item.href) ? item.href.includes(location.pathname) : location.pathname === item.href)
+              ? "bg-white text-black"
+              : "text-white hover:bg-gray-700"
+          }`}
+        >
+          {item.name}
+        </button>
+      ))}
       </nav>
 
       {/* User Navigation at the Bottom */}

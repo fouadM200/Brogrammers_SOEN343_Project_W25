@@ -2,19 +2,36 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
-import QuitConfirmation from "./QuitConfirmation"; // Import QuitConfirmation
+import QuitConfirmation from "./QuitConfirmation";
+import DisplayAccessCode from "./EventEntryDetails";
 
 export default function UserDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const navigate = useNavigate(); // Initialize navigation
+  const [showAccessCode, setShowAccessCode] = useState(false);
+  const [selectedEventName, setSelectedEventName] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Retrieve the user from localStorage
     const user = JSON.parse(localStorage.getItem("currentUser"));
     setCurrentUser(user);
   }, []);
+
+  const events = [
+    {
+      name: "Upcoming Event 1",
+      speaker: "John Doe",
+      date: "March 10, 2025",
+      time: "2:00 PM - 4:00 PM"
+    },
+    {
+      name: "Upcoming Event 2",
+      speaker: "Jane Smith",
+      date: "March 15, 2025",
+      time: "10:00 AM - 12:00 PM"
+    }
+  ];
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
@@ -45,21 +62,48 @@ export default function UserDashboard() {
 
           {/* Upcoming Events Section */}
           <div className="mt-6 grid grid-cols-1 gap-4">
-            <div className="bg-white p-4 shadow-md rounded-md hover:bg-gray-200 transition duration-300">
-              <h3 className="text-lg font-semibold">Upcoming Event 1</h3>
-              <hr className="my-2 border-gray-300" />
-              <p className="text-gray-500">Speaker: John Doe</p>
-              <p className="text-gray-500">Date: March 10, 2025</p>
-              <p className="text-gray-500">Time: 2:00 PM - 4:00 PM</p>
-            </div>
-
-            <div className="bg-white p-4 shadow-md rounded-md hover:bg-gray-200 transition duration-300">
-              <h3 className="text-lg font-semibold">Upcoming Event 2</h3>
-              <hr className="my-2 border-gray-300" />
-              <p className="text-gray-500">Speaker: Jane Smith</p>
-              <p className="text-gray-500">Date: March 15, 2025</p>
-              <p className="text-gray-500">Time: 10:00 AM - 12:00 PM</p>
-            </div>
+            {events.map((event, index) => (
+              <div
+                key={event.name}
+                className="bg-white p-4 shadow-md rounded-md hover:bg-gray-200 transition duration-300 flex justify-between items-center opacity-0 animate-fade-in"
+                style={{
+                  animationDelay: `${index * 0.1}s`,
+                  animationFillMode: "forwards",
+                  animationDuration: "0.5s"
+                }}
+              >
+                <div>
+                  <h3 className="text-lg font-semibold">{event.name}</h3>
+                  <p className="text-gray-500">Speaker: {event.speaker}</p>
+                  <p className="text-gray-500">Date: {event.date}</p>
+                  <p className="text-gray-500">Time: {event.time}</p>
+                </div>
+                <div className="flex flex-col gap-2 ml-6">
+                  <button
+                    className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
+                    onClick={() => {
+                      setSelectedEventName(event.name);
+                      setShowAccessCode(true);
+                    }}
+                  >
+                    Event Entry Details
+                  </button>
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                    onClick={() =>
+                      navigate("/online_event_access", {
+                        state: {
+                          eventName: event.name,
+                          user: currentUser
+                        }
+                      })
+                    }
+                  >
+                    Access Event
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </main>
       </div>
@@ -70,11 +114,19 @@ export default function UserDashboard() {
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
-              navigate("/auth"); // Redirect to /auth after confirming logout
+              navigate("/auth");
             }}
             onCancel={() => setShowConfirm(false)}
           />
         </div>
+      )}
+
+      {/* Access Code Overlay */}
+      {showAccessCode && (
+        <DisplayAccessCode
+          eventName={selectedEventName}
+          onOk={() => setShowAccessCode(false)}
+        />
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline';
 export default function HeaderMenuBar({ toggleSidebar }) {
   return (
     <header className="bg-white shadow-sm p-4 flex justify-between items-center">
-      {/* 3-Dashed Lines (Menu Button) */}
+    {/* 3-Dashed Lines (Menu Button) */}
       <button
         className="p-2 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-indigo-500"
         onClick={toggleSidebar}
