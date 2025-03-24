@@ -61,3 +61,26 @@ exports.login = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+exports.updateInterests = async (req, res) => {
+  try {
+    const { email, interests } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update the user's interests
+    user.interests = interests;
+    await user.save();
+
+    // Return the updated user
+    res.json(user);
+  } catch (error) {
+    console.error("Error updating interests:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
