@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -17,6 +17,8 @@ const EventDescription = ({ user, onSignOut }) => {
   const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
   const updatedEvent = storedEvents.find(e => e.title === event?.title) || event;
 
+  console.log("Updated Event:", updatedEvent); // Debugging
+
   const fallbackEvent = {
     title: "Event Title",
     speaker: "Unknown Speaker",
@@ -30,7 +32,7 @@ const EventDescription = ({ user, onSignOut }) => {
       concordiaStudents: "Not Set",
     },
     description: "No description available for this event.",
-    tags: ["test"] 
+    tags: ["no tags added"] // Fallback tags
   };
 
   const currentEvent = {
@@ -41,13 +43,15 @@ const EventDescription = ({ user, onSignOut }) => {
       ? updatedEvent.endTime && updatedEvent.endTime !== "N/A"
         ? `${updatedEvent.startTime} - ${updatedEvent.endTime}`
         : updatedEvent.startTime
-      : fallbackEvent.time, // Fix for missing time
+      : fallbackEvent.time,
     mode: updatedEvent?.mode || fallbackEvent.mode,
     room: updatedEvent?.room || fallbackEvent.room,
     description: updatedEvent?.description || fallbackEvent.description,
     registration: updatedEvent?.registration || fallbackEvent.registration,
-    tags: updatedEvent?.tags || fallbackEvent.tags
+    tags: updatedEvent?.tags || fallbackEvent.tags,
   };
+
+  console.log("Current Event:", currentEvent);
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
@@ -122,9 +126,11 @@ const EventDescription = ({ user, onSignOut }) => {
           <p className="text-xl text-gray-700 leading-relaxed">
             {currentEvent.description}
           </p>
+
+          {/* Tags */}
           <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">Tags</h2>
           <p className="text-xl text-gray-700 leading-relaxed">
-            {currentEvent.tags}
+            {currentEvent.tags.join(", ")}
           </p>
 
           {/* Action Buttons */}

@@ -53,6 +53,7 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
         university: user.university,
+        interests: user.interests || []
       },
     });
   } catch (error) {

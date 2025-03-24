@@ -16,25 +16,51 @@ export default function Profile() {
     }
   }, []);
 
-  const handleAddInterest = () => {
+  const updateUserInterests = async (updatedInterests) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch("http://localhost:5000/api/auth/update-interests", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          interests: updatedInterests
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update interests");
+      }
+
+      const updatedUser = await response.json();
+      setCurrentUser(updatedUser);
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error("Error updating interests:", error);
+      alert("Failed to update interests. Please try again.");
+    }
+  };
+
+  const handleAddInterest = async () => {
     if (newInterest.trim() !== "") {
       const updatedInterests = [...interests, newInterest.trim()];
       setInterests(updatedInterests);
       setNewInterest("");
-
-      const updatedUser = { ...currentUser, interests: updatedInterests };
-      setCurrentUser(updatedUser);
-      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+      await updateUserInterests(updatedInterests);
     }
   };
 
-  const handleRemoveInterest = (interest) => {
+  const handleRemoveInterest = async (interest) => {
     const updatedInterests = interests.filter(i => i !== interest);
     setInterests(updatedInterests);
-
-    const updatedUser = { ...currentUser, interests: updatedInterests };
-    setCurrentUser(updatedUser);
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    await updateUserInterests(updatedInterests);
   };
 
   return (

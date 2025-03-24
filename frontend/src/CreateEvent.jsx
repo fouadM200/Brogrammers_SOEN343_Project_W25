@@ -1,4 +1,3 @@
-// src/CreateEvent.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OrganizerSideMenuBar from "./OrganizerSideMenuBar";
@@ -30,6 +29,7 @@ const CreateEvent = ({ user }) => {
       concordiaStudents: "Free",
     },
     description: "",
+    tags: [], // Add tags as an empty array
   });
 
   const handleChange = (e) => {
@@ -112,7 +112,7 @@ const CreateEvent = ({ user }) => {
       <div className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="p-6 min-h-screen bg-gray-100">
-        <h1 className="text-3xl font-bold text-left mb-2">Create a New Event</h1>
+          <h1 className="text-3xl font-bold text-left mb-2">Create a New Event</h1>
           <hr className="border-gray-300 mb-6" />
           <div className="w-full max-w-5xl">
             {/* Title & Speaker */}
@@ -174,7 +174,7 @@ const CreateEvent = ({ user }) => {
                 <div>
                   <label className="block mb-1 text-sm">Regular Attendee:</label>
                   <input type="text" inputMode="decimal" pattern="^\d+(\.\d{0,2})?$" name="regular" value={eventDetails.registration.regular} onChange={handleChange} onBlur={(e) => !isNaN(parseFloat(e.target.value)) && setEventDetails(prev => ({ ...prev, registration: { ...prev.registration, regular: parseFloat(e.target.value).toFixed(2) } }))} className="p-3 border rounded w-full" />
-                  </div>
+                </div>
                 <div>
                   <label className="block mb-1 text-sm">Other University Students:</label>
                   <input type="text" name="otherStudents" value={eventDetails.registration.otherStudents} readOnly className="p-3 border rounded w-full bg-gray-50 text-gray-700 cursor-not-allowed" />
@@ -190,6 +190,25 @@ const CreateEvent = ({ user }) => {
             <div className="mb-4">
               <label className="block mb-1 font-medium">Event Description:</label>
               <textarea name="description" value={eventDetails.description} onChange={handleChange} className="w-full h-40 p-3 border rounded"></textarea>
+            </div>
+
+            {/* Tags */}
+            <div className="mb-4">
+              <label className="block mb-1 font-medium">Event Tags (comma-separated):</label>
+              <input
+                type="text"
+                name="tags"
+                value={eventDetails.tags.join(", ")}
+                onChange={(e) => {
+                  const tagsArray = e.target.value.split(",").map(tag => tag.trim());
+                  setEventDetails((prev) => ({
+                    ...prev,
+                    tags: tagsArray,
+                  }));
+                }}
+                className="w-full p-3 border rounded"
+                placeholder="e.g., tech, conference, workshop"
+              />
             </div>
 
             {/* Buttons */}

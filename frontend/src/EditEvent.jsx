@@ -17,7 +17,6 @@ const EditEvent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const [eventDetails, setEventDetails] = useState(() => ({
-
     title: event?.title || "",
     speaker: event?.speaker || "",
     date: event?.date || "",
@@ -32,6 +31,7 @@ const EditEvent = () => {
       concordiaStudents: "Free",
     },
     description: event?.description || "",
+    tags: event?.tags || [], // Add tags field
   }));
 
   useEffect(() => {
@@ -93,6 +93,7 @@ const EditEvent = () => {
         ...eventDetails,
         startTime: eventDetails.startTime.trim(),
         endTime: eventDetails.endTime.trim() || "N/A",
+        tags: eventDetails.tags, // Include tags in the updated event
       };
 
       localStorage.setItem("events", JSON.stringify(storedEvents));
@@ -278,14 +279,33 @@ const EditEvent = () => {
               ></textarea>
             </div>
 
+            {/* Tags */}
+            <div className="mb-4">
+              <label className="block mb-1 font-medium">Event Tags (comma-separated):</label>
+              <input
+                type="text"
+                name="tags"
+                value={eventDetails.tags.join(", ")}
+                onChange={(e) => {
+                  const tagsArray = e.target.value.split(",").map(tag => tag.trim());
+                  setEventDetails((prev) => ({
+                    ...prev,
+                    tags: tagsArray,
+                  }));
+                }}
+                className="w-full p-3 border rounded"
+                placeholder="e.g., tech, conference, workshop"
+              />
+            </div>
+
             {/* Buttons */}
             <div className="flex gap-4">
-            <button
-              onClick={() => setShowCancelOverlay(true)}
-              className="flex-1 bg-gray-800 text-white p-3 rounded-md hover:bg-gray-900"
-            >
-              Cancel
-            </button>
+              <button
+                onClick={() => setShowCancelOverlay(true)}
+                className="flex-1 bg-gray-800 text-white p-3 rounded-md hover:bg-gray-900"
+              >
+                Cancel
+              </button>
               <button
                 onClick={handleSaveChanges}
                 className="flex-1 bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600"
