@@ -11,27 +11,32 @@ export default function UserDashboard() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAccessCode, setShowAccessCode] = useState(false);
   const [selectedEventName, setSelectedEventName] = useState("");
+  const [events, setEvents] = useState([]);
+  const [recommendedEvents, setRecommendedEvents] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("currentUser"));
     setCurrentUser(user);
+
+    const savedEvents = JSON.parse(localStorage.getItem("userEvents")) || [];
+    setEvents(savedEvents);
+
+    const allEvents = JSON.parse(localStorage.getItem("events")) || []; // Assuming all events are stored here
+    const userTags = (user?.tags || []).map(tag => tag.trim().toLowerCase());
+
+    // Filter events that match user's tags
+    const filteredEvents = allEvents.filter(event =>
+      event.tags.some(tag => userTags.includes(tag.toLowerCase()))
+    );
+    setRecommendedEvents(filteredEvents);
   }, []);
 
-  const events = [
-    {
-      name: "Upcoming Event 1",
-      speaker: "John Doe",
-      date: "March 10, 2025",
-      time: "2:00 PM - 4:00 PM"
-    },
-    {
-      name: "Upcoming Event 2",
-      speaker: "Jane Smith",
-      date: "March 15, 2025",
-      time: "10:00 AM - 12:00 PM"
-    }
-  ];
+  const leaveEvent = (eventName) => {
+    const updatedEvents = events.filter(event => event.name !== eventName);
+    setEvents(updatedEvents);
+    localStorage.setItem("userEvents", JSON.stringify(updatedEvents));
+  };
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
@@ -62,48 +67,110 @@ export default function UserDashboard() {
 
           {/* Upcoming Events Section */}
           <div className="mt-6 grid grid-cols-1 gap-4">
-            {events.map((event, index) => (
-              <div
-                key={event.name}
-                className="bg-white p-4 shadow-md rounded-md hover:bg-gray-200 transition duration-300 flex justify-between items-center opacity-0 animate-fade-in"
-                style={{
-                  animationDelay: `${index * 0.1}s`,
-                  animationFillMode: "forwards",
-                  animationDuration: "0.5s"
-                }}
-              >
-                <div>
-                  <h3 className="text-lg font-semibold">{event.name}</h3>
-                  <p className="text-gray-500">Speaker: {event.speaker}</p>
-                  <p className="text-gray-500">Date: {event.date}</p>
-                  <p className="text-gray-500">Time: {event.time}</p>
+            {events.length > 0 ? (
+              events.map((event, index) => (
+                <div
+                  key={event.name}
+                  className="bg-white p-4 shadow-md rounded-md hover:bg-gray-200 transition duration-300 flex justify-between items-center opacity-0 animate-fade-in"
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    animationFillMode: "forwards",
+                    animationDuration: "0.5s"
+                  }}
+                >
+                  <div>
+                    <h4 className="text-lg font-semibold">{event.title}</h4>
+                    <p className="text-gray-500">Speaker: {event.speaker}</p>
+                    <p className="text-gray-500">Date: {event.date}</p>
+                    <p className="text-gray-500">Time: {event.time}</p>
+                  </div>
+                  <div className="flex flex-col gap-2 ml-6">
+                    <button
+                      className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
+                      onClick={() => {
+                        setSelectedEventName(event.name);
+                        setShowAccessCode(true);
+                      }}
+                    >
+                      Event Entry Details
+                    </button>
+                    <button
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                      onClick={() =>
+                        navigate("/online_event_access", {
+                          state: {
+                            eventName: event.name,
+                            user: currentUser
+                          }
+                        })
+                      }
+                    >
+                      Access Event
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                      onClick={() => leaveEvent(event.name)}
+                    >
+                      Leave Event
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2 ml-6">
-                  <button
-                    className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
-                    onClick={() => {
-                      setSelectedEventName(event.name);
-                      setShowAccessCode(true);
-                    }}
-                  >
-                    Event Entry Details
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                    onClick={() =>
-                      navigate("/online_event_access", {
-                        state: {
-                          eventName: event.name,
-                          user: currentUser
-                        }
-                      })
-                    }
-                  >
-                    Access Event
-                  </button>
+              ))
+            ) : (
+              <p className="text-gray-500">No upcoming events registered.</p>
+            )}
+          </div>
+
+          {/* Events You Might Be Interested In */}
+          <h2 className="text-2xl font-semibold mt-6">Events You Might Be Interested In</h2>
+          <hr className="my-2 border-gray-300" />
+          <div className="mt-6 grid grid-cols-1 gap-4">
+            {recommendedEvents.length > 0 ? (
+              recommendedEvents.map((event, index) => (
+                <div
+                  key={event.name}
+                  className="bg-white p-4 shadow-md rounded-md hover:bg-gray-200 transition duration-300 flex justify-between items-center opacity-0 animate-fade-in"
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    animationFillMode: "forwards",
+                    animationDuration: "0.5s"
+                  }}
+                >
+                  <div>
+                    <h4 className="text-lg font-semibold">{event.title}</h4>
+                    <p className="text-gray-500">Speaker: {event.speaker}</p>
+                    <p className="text-gray-500">Date: {event.date}</p>
+                    <p className="text-gray-500">Time: {event.time}</p>
+                  </div>
+                  <div className="flex flex-col gap-2 ml-6">
+                    <button
+                      className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
+                      onClick={() => {
+                        setSelectedEventName(event.name);
+                        setShowAccessCode(true);
+                      }}
+                    >
+                      Event Entry Details
+                    </button>
+                    <button
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                      onClick={() =>
+                        navigate("/online_event_access", {
+                          state: {
+                            eventName: event.name,
+                            user: currentUser
+                          }
+                        })
+                      }
+                    >
+                      Access Event
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-gray-500">No events match your interests.</p>
+            )}
           </div>
         </main>
       </div>

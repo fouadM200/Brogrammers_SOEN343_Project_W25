@@ -24,7 +24,7 @@ export default function OrganizerSideMenuBar({ user, onSignOut }) {
 
   // User navigation links
   const userNavigation = [
-    { name: "Your Profile", href: "/profile" },
+    { name: "Your Profile", href: "/Profile" },
     { name: "Sign out", action: onSignOut },
   ];
 

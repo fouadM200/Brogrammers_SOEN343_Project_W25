@@ -29,9 +29,9 @@ const EventDescription = ({ user, onSignOut }) => {
       otherStudents: "Not Set",
       concordiaStudents: "Not Set",
     },
-    description: "No description available for this event."
+    description: "No description available for this event.",
+    tags: ["test"] 
   };
-  
 
   const currentEvent = {
     title: updatedEvent?.title || fallbackEvent.title,
@@ -45,7 +45,8 @@ const EventDescription = ({ user, onSignOut }) => {
     mode: updatedEvent?.mode || fallbackEvent.mode,
     room: updatedEvent?.room || fallbackEvent.room,
     description: updatedEvent?.description || fallbackEvent.description,
-    registration: updatedEvent?.registration || fallbackEvent.registration
+    registration: updatedEvent?.registration || fallbackEvent.registration,
+    tags: updatedEvent?.tags || fallbackEvent.tags
   };
 
   return (
@@ -93,34 +94,37 @@ const EventDescription = ({ user, onSignOut }) => {
 
           {/* Pricing Info */}
           <p className="text-lg text-gray-700 mb-2">
-          <strong>Registration Pricing:</strong>
-          <ul className="mt-1 ml-6 list-disc list-inside space-y-1">
-           <li>
-             <strong>Regular:</strong> {currentEvent.registration?.regular || "Not Set"} $CAD
-           </li>
-           <li>
-            <strong>Other University Students:</strong>{" "}
-            <span className="line-through text-gray-500 mr-2">
-            {currentEvent.registration?.regular ? `${currentEvent.registration.regular} $CAD` : "Not Set"}
-         </span>
-         <span>{currentEvent.registration?.otherStudents || "Not Set"} $CAD</span>
-         <span className="text-red-500 font-semibold"> (30% discount)</span>
-       </li>
-        <li>
-      <strong>Concordia Students:</strong>{" "}
-      <span className="line-through text-gray-500 mr-2">
-        {currentEvent.registration?.regular ? `${currentEvent.registration.regular} $CAD` : "Not Set"}
-      </span>
-      <span>{currentEvent.registration?.concordiaStudents || "Not Set"}</span>
-    </li>
-  </ul>
-</p>
-
+            <strong>Registration Pricing:</strong>
+            <ul className="mt-1 ml-6 list-disc list-inside space-y-1">
+              <li>
+                <strong>Regular:</strong> {currentEvent.registration?.regular || "Not Set"} $CAD
+              </li>
+              <li>
+                <strong>Other University Students:</strong>{" "}
+                <span className="line-through text-gray-500 mr-2">
+                  {currentEvent.registration?.regular ? `${currentEvent.registration.regular} $CAD` : "Not Set"}
+                </span>
+                <span>{currentEvent.registration?.otherStudents || "Not Set"} $CAD</span>
+                <span className="text-red-500 font-semibold"> (30% discount)</span>
+              </li>
+              <li>
+                <strong>Concordia Students:</strong>{" "}
+                <span className="line-through text-gray-500 mr-2">
+                  {currentEvent.registration?.regular ? `${currentEvent.registration.regular} $CAD` : "Not Set"}
+                </span>
+                <span>{currentEvent.registration?.concordiaStudents || "Not Set"}</span>
+              </li>
+            </ul>
+          </p>
 
           {/* Description */}
           <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">Event Description</h2>
           <p className="text-xl text-gray-700 leading-relaxed">
             {currentEvent.description}
+          </p>
+          <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">Tags</h2>
+          <p className="text-xl text-gray-700 leading-relaxed">
+            {currentEvent.tags}
           </p>
 
           {/* Action Buttons */}
@@ -133,7 +137,24 @@ const EventDescription = ({ user, onSignOut }) => {
             </button>
 
             <button
-              onClick={() => alert("Registration feature coming soon! 😉")}
+              onClick={() => {
+                // Get current user from local storage
+                const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {};
+
+                // Get user's existing registered events
+                let userEvents = JSON.parse(localStorage.getItem("userEvents")) || [];
+
+                // Check if the event is already in the user's events
+                if (!userEvents.some(e => e.title === currentEvent.title)) {
+                  userEvents.push(currentEvent);
+                }
+
+                // Save updated events back to local storage
+                localStorage.setItem("userEvents", JSON.stringify(userEvents));
+
+                // Navigate to User Dashboard
+                navigate("/dashboard");
+              }}
               className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition"
             >
               Register & Pay

@@ -14,6 +14,8 @@ import EventDescription from "./EventDescription";
 import CreateEvent from "./CreateEvent";
 import EditEvent from "./EditEvent";
 import OnlineEventAccess from './OnlineEventAccess';
+import Profile from "./Profile";
+
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -48,6 +50,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
+      <Route path="/profile" element={<Profile />} />
         <Route path="/" element={<Homepage />} />
 
         <Route 

@@ -17,8 +17,7 @@ const eventSchema = new mongoose.Schema({
   location: { type: String, required: true },
   registration: { type: registrationSchema, default: {} },
   description: { type: String, default: "" },
-
-  // We'll store the organizer info
+  tags: {type: [String], default: ["test"] },
   organizerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   organizerName: { type: String, default: "Unknown Organizer" },
 });

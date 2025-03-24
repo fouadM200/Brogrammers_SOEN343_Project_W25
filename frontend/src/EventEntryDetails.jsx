@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
-import QRCode from "react-qr-code";
+//import QRCode from "react-qr-code";
 
 const DisplayAccessCode = ({ eventName = "Sample Event", onOk }) => {
   const [showToast, setShowToast] = useState(false);

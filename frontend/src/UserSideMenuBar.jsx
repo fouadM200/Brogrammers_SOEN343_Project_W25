@@ -23,7 +23,7 @@ export default function UserSideMenuBar({ user, onSignOut }) {
 
   // User navigation links
   const userNavigation = [
-    { name: "Your Profile", href: "" },
+    { name: "Your Profile", href: "/Profile" },
     { name: "Sign out", action: onSignOut },
   ];
 
