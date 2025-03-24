@@ -84,3 +84,18 @@ exports.updateInterests = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.getProfile = async (req, res) => {
+  try {
+    const { userId } = req.user; // userId is set by authMiddleware if you decode the token
+    const user = await User.findById(userId).populate("registeredEvents");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    // Return the full user, including the populated events
+    res.json(user);
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

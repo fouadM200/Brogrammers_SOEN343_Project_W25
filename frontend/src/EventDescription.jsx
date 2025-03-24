@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -10,20 +10,17 @@ const EventDescription = ({ user, onSignOut }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Extract event and search state from location
-  const { event, searchState } = location.state || {};
+  // We receive an 'event' object via React Router location state
+  const { event } = location.state || {};
 
-  // Ensure we get the latest data from localStorage
-  const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
-  const updatedEvent = storedEvents.find(e => e.title === event?.title) || event;
-
-  console.log("Updated Event:", updatedEvent); // Debugging
-
+  // Fallback event if none is provided
   const fallbackEvent = {
+    _id: null,
     title: "Event Title",
     speaker: "Unknown Speaker",
     date: "Unknown Date",
-    time: "Unknown Time",
+    startTime: "Unknown",
+    endTime: "",
     mode: "in-person",
     room: "Room 101",
     registration: {
@@ -32,26 +29,66 @@ const EventDescription = ({ user, onSignOut }) => {
       concordiaStudents: "Not Set",
     },
     description: "No description available for this event.",
-    tags: ["no tags added"] // Fallback tags
+    tags: ["no tags added"],
   };
 
+  // Merge event data with fallback
   const currentEvent = {
-    title: updatedEvent?.title || fallbackEvent.title,
-    speaker: updatedEvent?.speaker || fallbackEvent.speaker,
-    date: updatedEvent?.date || fallbackEvent.date,
-    time: updatedEvent?.startTime
-      ? updatedEvent.endTime && updatedEvent.endTime !== "N/A"
-        ? `${updatedEvent.startTime} - ${updatedEvent.endTime}`
-        : updatedEvent.startTime
-      : fallbackEvent.time,
-    mode: updatedEvent?.mode || fallbackEvent.mode,
-    room: updatedEvent?.room || fallbackEvent.room,
-    description: updatedEvent?.description || fallbackEvent.description,
-    registration: updatedEvent?.registration || fallbackEvent.registration,
-    tags: updatedEvent?.tags || fallbackEvent.tags,
+    ...fallbackEvent,
+    ...event,
+    title: event?.title || fallbackEvent.title,
+    speaker: event?.speaker || fallbackEvent.speaker,
+    date: event?.date || fallbackEvent.date,
+    startTime: event?.startTime || fallbackEvent.startTime,
+    endTime: event?.endTime || fallbackEvent.endTime,
+    mode: event?.mode || fallbackEvent.mode,
+    room: event?.room || fallbackEvent.room,
+    description: event?.description || fallbackEvent.description,
+    registration: event?.registration || fallbackEvent.registration,
+    tags: event?.tags || fallbackEvent.tags,
   };
 
-  console.log("Current Event:", currentEvent);
+  // Convert date/time for display
+  const displayDate = new Date(currentEvent.date).toLocaleDateString() || "Unknown Date";
+  const displayTime = currentEvent.endTime
+    ? `${currentEvent.startTime} - ${currentEvent.endTime}`
+    : currentEvent.startTime;
+
+  // Handler for registering user for this event
+  const handleRegister = async () => {
+    try {
+      // We need the user's token to authorize the request
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to register for an event.");
+        return;
+      }
+
+      // Call the backend to register the user for the event
+      const response = await fetch("http://localhost:5000/api/events/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ eventId: currentEvent._id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to register for event");
+      }
+
+      // Optionally show a success message
+      alert("Successfully registered for the event!");
+
+      // Navigate to the user dashboard
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error registering for event:", error);
+      alert("Error registering for event: " + error.message);
+    }
+  };
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
@@ -76,14 +113,15 @@ const EventDescription = ({ user, onSignOut }) => {
         <div className="p-6 w-full max-w-screen-lg mx-0">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">{currentEvent.title}</h1>
           <hr className="mb-8 border-gray-300 w-full" />
+
           <p className="text-lg text-gray-700 mb-2">
             <strong>Speaker:</strong> {currentEvent.speaker}
           </p>
           <p className="text-lg text-gray-700 mb-2">
-            <strong>Date:</strong> {currentEvent.date}
+            <strong>Date:</strong> {displayDate}
           </p>
           <p className="text-lg text-gray-700 mb-2">
-            <strong>Time:</strong> {currentEvent.time}
+            <strong>Time:</strong> {displayTime}
           </p>
           <p className="text-lg text-gray-700 mb-2">
             <strong>Mode:</strong> {currentEvent.mode}
@@ -96,27 +134,41 @@ const EventDescription = ({ user, onSignOut }) => {
             </p>
           )}
 
-          {/* Pricing Info */}
+          {/* Registration Info */}
           <p className="text-lg text-gray-700 mb-2">
             <strong>Registration Pricing:</strong>
             <ul className="mt-1 ml-6 list-disc list-inside space-y-1">
               <li>
-                <strong>Regular:</strong> {currentEvent.registration?.regular || "Not Set"} $CAD
+                <strong>Regular:</strong>{" "}
+                {currentEvent.registration.regular
+                  ? `${currentEvent.registration.regular} $CAD`
+                  : "Not Set"}
               </li>
               <li>
                 <strong>Other University Students:</strong>{" "}
                 <span className="line-through text-gray-500 mr-2">
-                  {currentEvent.registration?.regular ? `${currentEvent.registration.regular} $CAD` : "Not Set"}
+                  {currentEvent.registration.regular
+                    ? `${currentEvent.registration.regular} $CAD`
+                    : "Not Set"}
                 </span>
-                <span>{currentEvent.registration?.otherStudents || "Not Set"} $CAD</span>
+                <span>
+                  {currentEvent.registration.otherStudents
+                    ? `${currentEvent.registration.otherStudents} $CAD`
+                    : "Not Set"}
+                </span>
                 <span className="text-red-500 font-semibold"> (30% discount)</span>
               </li>
               <li>
                 <strong>Concordia Students:</strong>{" "}
                 <span className="line-through text-gray-500 mr-2">
-                  {currentEvent.registration?.regular ? `${currentEvent.registration.regular} $CAD` : "Not Set"}
+                  {currentEvent.registration.regular
+                    ? `${currentEvent.registration.regular} $CAD`
+                    : "Not Set"}
                 </span>
-                <span>{currentEvent.registration?.concordiaStudents || "Not Set"}</span>
+                <span>
+                  {currentEvent.registration.concordiaStudents ||
+                    "Not Set"}
+                </span>
               </li>
             </ul>
           </p>
@@ -136,31 +188,15 @@ const EventDescription = ({ user, onSignOut }) => {
           {/* Action Buttons */}
           <div className="mt-8 flex gap-4">
             <button
-              onClick={() => navigate("/search_events", { state: searchState })}
+              onClick={() => navigate("/search_events")}
               className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-900 transition"
             >
               Go Back to Search Events
             </button>
 
+            {/* Register & Pay (calls the backend, then navigates to Dashboard) */}
             <button
-              onClick={() => {
-                // Get current user from local storage
-                const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {};
-
-                // Get user's existing registered events
-                let userEvents = JSON.parse(localStorage.getItem("userEvents")) || [];
-
-                // Check if the event is already in the user's events
-                if (!userEvents.some(e => e.title === currentEvent.title)) {
-                  userEvents.push(currentEvent);
-                }
-
-                // Save updated events back to local storage
-                localStorage.setItem("userEvents", JSON.stringify(userEvents));
-
-                // Navigate to User Dashboard
-                navigate("/dashboard");
-              }}
+              onClick={handleRegister}
               className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition"
             >
               Register & Pay
@@ -175,7 +211,7 @@ const EventDescription = ({ user, onSignOut }) => {
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
-              navigate("/auth"); // Redirect to /auth after confirming logout
+              navigate("/auth");
             }}
             onCancel={() => setShowConfirm(false)}
           />

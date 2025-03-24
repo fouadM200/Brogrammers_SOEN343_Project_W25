@@ -76,3 +76,58 @@ exports.deleteEvent = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+exports.registerForEvent = async (req, res) => {
+  try {
+    const { userId } = req.user;    // from authMiddleware (decoded token)
+    const { eventId } = req.body;   // pass in { eventId } in the request body
+
+    // Find the event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // If not already registered, push it
+    if (!user.registeredEvents.includes(eventId)) {
+      user.registeredEvents.push(eventId);
+      await user.save();
+    }
+
+    res.json({ message: "Registered for event successfully" });
+  } catch (error) {
+    console.error("Register for event error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Leave (unregister from) an event
+exports.leaveEvent = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { eventId } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Remove event from user's registeredEvents array
+    user.registeredEvents = user.registeredEvents.filter(
+      (id) => id.toString() !== eventId
+    );
+    await user.save();
+
+    res.json({ message: "Left event successfully" });
+  } catch (error) {
+    console.error("Leave event error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
