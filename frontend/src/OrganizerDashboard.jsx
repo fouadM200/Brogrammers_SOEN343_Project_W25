@@ -1,4 +1,3 @@
-// src/OrganizerDashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import OrganizerSideMenuBar from "./OrganizerSideMenuBar";
@@ -6,6 +5,7 @@ import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import DeleteEvent from "./DeleteEvent";
 import EventDeleteSuccess from "./EventDeleteSuccess";
+import RegistrationDetailsOverlay from "./RegistrationDetailsOverlay";
 
 export default function OrganizerDashboard({ user }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,6 +18,10 @@ export default function OrganizerDashboard({ user }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+
+  // For registration details overlay
+  const [showRegistrationOverlay, setShowRegistrationOverlay] = useState(false);
+  const [registrationEvent, setRegistrationEvent] = useState(null);
 
   const navigate = useNavigate();
 
@@ -33,12 +37,11 @@ export default function OrganizerDashboard({ user }) {
 
         const res = await fetch("http://localhost:5000/api/events/my-events", {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!res.ok) {
-          // Could handle errors here
           console.error("Failed to fetch organizer events");
           return;
         }
@@ -53,15 +56,15 @@ export default function OrganizerDashboard({ user }) {
     fetchMyEvents();
   }, []);
 
-  // 2) Delete an event (optional)
+  // 2) Delete an event
   const handleDelete = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`http://localhost:5000/api/events/${eventId}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) {
@@ -69,7 +72,7 @@ export default function OrganizerDashboard({ user }) {
         return;
       }
 
-      // Remove from state
+      // Remove event from state
       setEvents((prev) => prev.filter((ev) => ev._id !== eventId));
       setShowDeleteSuccess(true);
     } catch (error) {
@@ -77,13 +80,23 @@ export default function OrganizerDashboard({ user }) {
     }
   };
 
-  // Format times 
+  // Format 24-hour time to 12-hour time
   const formatTime12Hour = (time24) => {
     if (!time24 || time24 === "N/A") return "N/A";
     const [hour, minute] = time24.split(":");
     const date = new Date();
     date.setHours(parseInt(hour, 10), parseInt(minute, 10));
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Function to open registration details overlay for an event
+  const viewRegistrations = (event) => {
+    setRegistrationEvent(event);
+    setShowRegistrationOverlay(true);
   };
 
   return (
@@ -94,7 +107,10 @@ export default function OrganizerDashboard({ user }) {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <OrganizerSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+        <OrganizerSideMenuBar
+          user={user}
+          onSignOut={() => setShowConfirm(true)}
+        />
       </div>
 
       {/* Main Content */}
@@ -106,14 +122,15 @@ export default function OrganizerDashboard({ user }) {
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <main className="p-6 bg-gray-100 flex-1">
-          <h1 className="text-3xl font-bold">Hello, {user?.name || "-- user first name --"}!</h1>
+          <h1 className="text-3xl font-bold">
+            Hello, {user?.name || "-- user first name --"}!
+          </h1>
           <p className="text-gray-600">Welcome to your Dashboard.</p>
           <hr className="my-2 border-gray-300" />
 
           <h2 className="text-2xl font-semibold mt-6">Upcoming Events</h2>
           <hr className="my-2 border-gray-300" />
 
-          {/* 4) Display the events fetched from the server */}
           {events.length === 0 ? (
             <p className="text-gray-500">No events created yet.</p>
           ) : (
@@ -130,16 +147,21 @@ export default function OrganizerDashboard({ user }) {
                       Date: {new Date(event.date).toLocaleDateString()}
                     </p>
                     <p className="text-gray-500">
-                      Time: {formatTime12Hour(event.startTime)} - {formatTime12Hour(event.endTime)}
+                      Time: {formatTime12Hour(event.startTime)} -{" "}
+                      {formatTime12Hour(event.endTime)}
                     </p>
                     <p className="text-gray-500">
                       Mode: {event.mode}{" "}
-                      {event.mode !== "online" && event.room ? `| Room: ${event.room}` : ""}
+                      {event.mode !== "online" && event.room
+                        ? `| Room: ${event.room}`
+                        : ""}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => navigate("/edit_event", { state: { event, user } })}
+                      onClick={() =>
+                        navigate("/edit_event", { state: { event, user } })
+                      }
                       className="px-4 py-2 bg-blue-500 text-white rounded-md"
                     >
                       Edit
@@ -152,6 +174,12 @@ export default function OrganizerDashboard({ user }) {
                       className="px-4 py-2 bg-gray-800 text-white rounded-md"
                     >
                       Delete
+                    </button>
+                    <button
+                      onClick={() => viewRegistrations(event)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                    >
+                      View Registrations
                     </button>
                   </div>
                 </div>
@@ -196,6 +224,17 @@ export default function OrganizerDashboard({ user }) {
           onOk={() => {
             setShowDeleteSuccess(false);
             setEventToDelete(null);
+          }}
+        />
+      )}
+
+      {/* Registration Details Overlay */}
+      {showRegistrationOverlay && registrationEvent && (
+        <RegistrationDetailsOverlay
+          event={registrationEvent}
+          onClose={() => {
+            setShowRegistrationOverlay(false);
+            setRegistrationEvent(null);
           }}
         />
       )}

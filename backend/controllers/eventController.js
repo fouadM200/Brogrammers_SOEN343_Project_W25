@@ -1,5 +1,6 @@
 const Event = require("../models/Event");
 const User = require("../models/User");
+const Payment = require("../models/Payment");
 
 // Create a new event
 exports.createEvent = async (req, res) => {
@@ -128,6 +129,23 @@ exports.leaveEvent = async (req, res) => {
     res.json({ message: "Left event successfully" });
   } catch (error) {
     console.error("Leave event error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Get registrations (with payment details) for a specific event
+exports.getEventRegistrations = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    // Find all payment records for the given eventId and populate the user details
+    const payments = await Payment.find({ eventId }).populate({
+      path: "userId",
+      select: "name email"
+    });
+    // Return the payment records
+    res.json(payments);
+  } catch (error) {
+    console.error("Error fetching event registrations:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
