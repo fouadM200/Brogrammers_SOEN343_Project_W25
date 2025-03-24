@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 app.use(express.json());
@@ -15,6 +16,7 @@ mongoose
 
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/payments", paymentRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

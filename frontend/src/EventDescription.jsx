@@ -196,7 +196,11 @@ const EventDescription = ({ user, onSignOut }) => {
 
             {/* Register & Pay (calls the backend, then navigates to Dashboard) */}
             <button
-              onClick={handleRegister}
+              onClick={() =>
+                navigate("/payment", {
+                  state: { event, user },
+                })
+              }
               className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition"
             >
               Register & Pay

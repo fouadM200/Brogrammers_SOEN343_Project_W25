@@ -15,6 +15,7 @@ import CreateEvent from "./CreateEvent";
 import EditEvent from "./EditEvent";
 import OnlineEventAccess from './OnlineEventAccess';
 import Profile from "./Profile";
+import PaymentScreen from "./PaymentScreen";
 
 
 const App = () => {
@@ -78,6 +79,8 @@ const App = () => {
         <Route path="/create_event" element={<CreateEvent user={currentUser} />} />
         <Route path="/online_event_access" element={<OnlineEventAccess />} />
         <Route path="/edit_event" element={<EditEvent />} />
+        <Route path="/payment" element={<PaymentScreen />} />
+
       </Routes>
     </Router>
   );

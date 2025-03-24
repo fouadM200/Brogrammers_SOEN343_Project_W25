@@ -1,3 +1,4 @@
+// src/SearchEvents.jsx
 import React, { useState, useEffect } from "react";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -6,6 +7,8 @@ import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const SearchEvents = ({ user }) => {
+  // We'll maintain a local profile state to keep the latest registeredEvents.
+  const [profile, setProfile] = useState(user);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,24 +16,49 @@ const SearchEvents = ({ user }) => {
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
 
-  // Load previous search on mount
+  // Fetch the latest user profile from the backend.
   useEffect(() => {
-    const savedSearch = sessionStorage.getItem("searchTerm");
-    const savedTriggered = sessionStorage.getItem("searchTriggered");
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await fetch("http://localhost:5000/api/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data);
+        } else {
+          console.error("Failed to fetch profile");
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, [user]);
 
-    if (savedSearch) setSearchTerm(savedSearch);
-    if (savedTriggered === "true") setSearchTriggered(true);
-  }, []);
-
-  // Fetch events when searchTriggered changes
+  // Fetch events from the backend when search is triggered or on mount,
+  // then filter out events that are already registered by the user.
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const queryParam = searchTriggered && searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : "";
+        const queryParam =
+          searchTriggered && searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : "";
         const res = await fetch(`http://localhost:5000/api/events${queryParam}`);
         if (res.ok) {
           const data = await res.json();
-          setEvents(data);
+          // Safely access profile.registeredEvents using optional chaining.
+          const registeredSet = new Set(
+            (profile?.registeredEvents || []).map((evt) =>
+              typeof evt === "object" && evt._id ? evt._id.toString() : evt.toString()
+            )
+          );
+          // Filter out events that are already registered.
+          const filteredEvents = data.filter(
+            (event) => !registeredSet.has(event._id.toString())
+          );
+          setEvents(filteredEvents);
         } else {
           console.error("Failed to fetch events");
         }
@@ -39,23 +67,29 @@ const SearchEvents = ({ user }) => {
       }
     };
     fetchEvents();
-  }, [searchTriggered]);
+  }, [searchTriggered, searchTerm, profile]);
 
   const handleSearch = () => {
-    sessionStorage.setItem("searchTerm", searchTerm);
-    sessionStorage.setItem("searchTriggered", "true");
     setSearchTriggered(true);
   };
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
-      <div className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"}`}>
-        <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+      <div
+        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-64"
+        }`}
+      >
+        <UserSideMenuBar user={profile} onSignOut={() => setShowConfirm(true)} />
       </div>
 
       {/* Main Content */}
-      <div className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+      <div
+        className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "ml-64" : "ml-0"
+        }`}
+      >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="p-6">
           {/* Search Bar */}
@@ -74,7 +108,10 @@ const SearchEvents = ({ user }) => {
                 className="flex-1 outline-none text-gray-700"
               />
             </div>
-            <button onClick={handleSearch} className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-900">
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-900"
+            >
               Search
             </button>
           </div>
@@ -94,7 +131,7 @@ const SearchEvents = ({ user }) => {
                     style={{
                       animationDelay: `${index * 0.1}s`,
                       animationFillMode: "forwards",
-                      animationDuration: "0.5s"
+                      animationDuration: "0.5s",
                     }}
                   >
                     <div>
@@ -108,18 +145,20 @@ const SearchEvents = ({ user }) => {
                         {new Date(`1970-01-01T${event.startTime}`).toLocaleTimeString([], {
                           hour: "numeric",
                           minute: "2-digit",
-                          hour12: true
+                          hour12: true,
                         })}{" "}
                         -{" "}
                         {new Date(`1970-01-01T${event.endTime}`).toLocaleTimeString([], {
                           hour: "numeric",
                           minute: "2-digit",
-                          hour12: true
+                          hour12: true,
                         })}
                       </p>
                       <p className="text-gray-500">
-                        Mode: {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
-                        {(event.mode === "in-person" || event.mode === "hybrid") && event.room
+                        Mode:{" "}
+                        {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
+                        {(event.mode === "in-person" || event.mode === "hybrid") &&
+                        event.room
                           ? ` | Room: ${event.room}`
                           : ""}
                       </p>
@@ -127,7 +166,7 @@ const SearchEvents = ({ user }) => {
                     <button
                       onClick={() =>
                         navigate("/event_description", {
-                          state: { event }
+                          state: { event },
                         })
                       }
                       className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"

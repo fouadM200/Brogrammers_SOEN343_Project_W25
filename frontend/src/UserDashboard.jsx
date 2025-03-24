@@ -21,7 +21,6 @@ export default function UserDashboard() {
 
   async function fetchProfileAndEvents() {
     try {
-      // Get token from localStorage or wherever you store it
       const token = localStorage.getItem("token");
 
       // Fetch user profile (includes registeredEvents)
@@ -40,18 +39,24 @@ export default function UserDashboard() {
     }
   }
 
-  // 2) Compute upcoming vs recommended in memory
+  // 2) Compute upcoming vs recommended events in memory
   const upcomingEvents = allEvents.filter((evt) =>
-    currentUser?.registeredEvents?.some((reg) => reg._id === evt._id)
+    currentUser?.registeredEvents?.some(
+      (reg) => reg._id.toString() === evt._id.toString()
+    )
   );
 
   const recommendedEvents = allEvents.filter((evt) => {
-    // Exclude events user is already registered for
-    const isRegistered = currentUser?.registeredEvents?.some((reg) => reg._id === evt._id);
+    // Exclude events the user is already registered for
+    const isRegistered = currentUser?.registeredEvents?.some(
+      (reg) => reg._id.toString() === evt._id.toString()
+    );
     if (isRegistered) return false;
 
     // Check if the event tags intersect with user interests
-    const userInterests = (currentUser?.interests || []).map((i) => i.trim().toLowerCase());
+    const userInterests = (currentUser?.interests || []).map((i) =>
+      i.trim().toLowerCase()
+    );
     return evt.tags.some((tag) => userInterests.includes(tag.toLowerCase()));
   });
 
@@ -101,7 +106,10 @@ export default function UserDashboard() {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={currentUser} onSignOut={() => setShowConfirm(true)} />
+        <UserSideMenuBar
+          user={currentUser}
+          onSignOut={() => setShowConfirm(true)}
+        />
       </div>
 
       {/* Main Content */}
@@ -113,7 +121,9 @@ export default function UserDashboard() {
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <main className="p-6 bg-gray-100 flex-1">
-          <h1 className="text-3xl font-bold">Hello, {currentUser?.name || "User"}!</h1>
+          <h1 className="text-3xl font-bold">
+            Hello, {currentUser?.name || "User"}!
+          </h1>
           <p className="text-gray-600">Welcome to your Dashboard.</p>
           <hr className="my-2 border-gray-300" />
 
@@ -139,7 +149,8 @@ export default function UserDashboard() {
                       Date: {new Date(event.date).toLocaleDateString()}
                     </p>
                     <p className="text-gray-500">
-                      Time: {event.startTime} {event.endTime && `- ${event.endTime}`}
+                      Time: {event.startTime}{" "}
+                      {event.endTime && `- ${event.endTime}`}
                     </p>
                   </div>
                   <div className="flex flex-col gap-2 ml-6">
@@ -177,14 +188,16 @@ export default function UserDashboard() {
           </div>
 
           {/* Events You Might Be Interested In */}
-          <h2 className="text-2xl font-semibold mt-6">Events You Might Be Interested In</h2>
+          <h2 className="text-2xl font-semibold mt-6">
+            Events You Might Be Interested In
+          </h2>
           <hr className="my-2 border-gray-300" />
           <div className="mt-6 grid grid-cols-1 gap-4">
             {recommendedEvents.length > 0 ? (
               recommendedEvents.map((event, index) => (
                 <div
                   key={event._id}
-                  className="bg-white p-4 shadow-md rounded-md hover:bg-gray-200 transition duration-300 flex justify-between items-center opacity-0 animate-fade-in"
+                  className="bg-white p-6 shadow-md rounded-lg transition duration-300 hover:bg-gray-100 flex justify-between items-center opacity-0 animate-fade-in"
                   style={{
                     animationDelay: `${index * 0.1}s`,
                     animationFillMode: "forwards",
@@ -192,43 +205,42 @@ export default function UserDashboard() {
                   }}
                 >
                   <div>
-                    <h4 className="text-lg font-semibold">{event.title}</h4>
+                    <h3 className="text-lg font-semibold">{event.title}</h3>
                     <p className="text-gray-500">Speaker: {event.speaker}</p>
                     <p className="text-gray-500">
                       Date: {new Date(event.date).toLocaleDateString()}
                     </p>
                     <p className="text-gray-500">
-                      Time: {event.startTime} {event.endTime && `- ${event.endTime}`}
+                      Time:{" "}
+                      {new Date(`1970-01-01T${event.startTime}`).toLocaleTimeString([], {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}{" "}
+                      -{" "}
+                      {new Date(`1970-01-01T${event.endTime}`).toLocaleTimeString([], {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </p>
+                    <p className="text-gray-500">
+                      Mode:{" "}
+                      {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
+                      {(event.mode === "in-person" || event.mode === "hybrid") &&
+                      event.room
+                        ? ` | Room: ${event.room}`
+                        : ""}
                     </p>
                   </div>
-                  <div className="flex flex-col gap-2 ml-6">
-                    <button
-                      className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
-                      onClick={() => {
-                        setSelectedEventName(event.title);
-                        setShowAccessCode(true);
-                      }}
-                    >
-                      Event Entry Details
-                    </button>
-                    <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      onClick={() =>
-                        navigate("/online_event_access", {
-                          state: { eventName: event.title, user: currentUser },
-                        })
-                      }
-                    >
-                      Access Event
-                    </button>
-                    {/* Register button */}
-                    <button
-                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                      onClick={() => handleRegister(event._id)}
-                    >
-                      Register
-                    </button>
-                  </div>
+                  <button
+                    onClick={() =>
+                      navigate("/event_description", { state: { event } })
+                    }
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                  >
+                    View Details
+                  </button>
                 </div>
               ))
             ) : (
@@ -253,7 +265,10 @@ export default function UserDashboard() {
 
       {/* Access Code Overlay */}
       {showAccessCode && (
-        <DisplayAccessCode eventName={selectedEventName} onOk={() => setShowAccessCode(false)} />
+        <DisplayAccessCode
+          eventName={selectedEventName}
+          onOk={() => setShowAccessCode(false)}
+        />
       )}
     </div>
   );
