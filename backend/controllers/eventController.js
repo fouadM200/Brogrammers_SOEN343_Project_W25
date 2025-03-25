@@ -149,3 +149,37 @@ exports.getEventRegistrations = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.user; 
+
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    if (event.organizerId.toString() !== userId) {
+      return res.status(403).json({ error: "You are not authorized to update this event" });
+    }
+
+    event.title = req.body.title || event.title;
+    event.speaker = req.body.speaker || event.speaker;
+    event.date = req.body.date || event.date;
+    event.startTime = req.body.startTime || event.startTime;
+    event.endTime = req.body.endTime || event.endTime;
+    event.mode = req.body.mode || event.mode;
+    event.room = req.body.room || event.room;
+    event.location = req.body.location || event.location;
+    event.registration = req.body.registration || event.registration;
+    event.description = req.body.description || event.description;
+    event.tags = req.body.tags || event.tags;
+
+    await event.save();
+    res.json({ message: "Event updated successfully", event });
+  } catch (error) {
+    console.error("Update event error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

@@ -16,6 +16,8 @@ const EditEvent = () => {
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  
+  // Initialize eventDetails from the event passed via location.state
   const [eventDetails, setEventDetails] = useState(() => ({
     title: event?.title || "",
     speaker: event?.speaker || "",
@@ -31,7 +33,7 @@ const EditEvent = () => {
       concordiaStudents: "Free",
     },
     description: event?.description || "",
-    tags: event?.tags || [], // Add tags field
+    tags: event?.tags || [],
   }));
 
   useEffect(() => {
@@ -43,7 +45,6 @@ const EditEvent = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === "regular") {
       const discount = parseFloat(value) * 0.7;
       setEventDetails((prev) => ({
@@ -55,11 +56,9 @@ const EditEvent = () => {
           concordiaStudents: "Free",
         },
       }));
-    } else if (
-      name === "otherStudents" ||
-      name === "concordiaStudents"
-    ) {
-      return; // prevent manual edit
+    } else if (name === "otherStudents" || name === "concordiaStudents") {
+      // Prevent manual edits
+      return;
     } else if (name in eventDetails.registration) {
       setEventDetails((prev) => ({
         ...prev,
@@ -76,30 +75,36 @@ const EditEvent = () => {
     }
   };
 
-  const handleSaveChanges = () => {
+  // Handle saving changes by calling the backend update endpoint.
+  const handleSaveChanges = async () => {
     const { title, date, startTime, location } = eventDetails;
-
     if (!title || !date || !startTime || !location) {
       alert("Please fill in all required fields.");
       return;
     }
-
-    let storedEvents = JSON.parse(localStorage.getItem("events")) || [];
-    const eventIndex = storedEvents.findIndex((e) => e.title === event.title);
-
-    if (eventIndex !== -1) {
-      storedEvents[eventIndex] = {
-        ...storedEvents[eventIndex],
-        ...eventDetails,
-        startTime: eventDetails.startTime.trim(),
-        endTime: eventDetails.endTime.trim() || "N/A",
-        tags: eventDetails.tags, // Include tags in the updated event
-      };
-
-      localStorage.setItem("events", JSON.stringify(storedEvents));
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in as an organizer to update an event.");
+        return;
+      }
+      const response = await fetch(`http://localhost:5000/api/events/${event._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(eventDetails),
+      });
+      if (!response.ok) {
+        const errData = await response.json();
+        alert(errData.error || "Failed to update event.");
+        return;
+      }
       setShowSaveSuccess(true);
-    } else {
-      alert("Event not found.");
+    } catch (error) {
+      console.error("Update event error:", error);
+      alert("Something went wrong. Please try again.");
     }
   };
 
@@ -217,7 +222,7 @@ const EditEvent = () => {
               </div>
             </div>
 
-            {/* Room */}
+            {/* Room (for in-person/hybrid) */}
             {(eventDetails.mode === "in-person" || eventDetails.mode === "hybrid") && (
               <div className="mb-4">
                 <label className="block mb-1 font-medium">Room Number:</label>
@@ -317,7 +322,7 @@ const EditEvent = () => {
         </div>
       </div>
 
-      {/* Quit Confirmation */}
+      {/* Overlays */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <QuitConfirmation
@@ -329,16 +334,12 @@ const EditEvent = () => {
           />
         </div>
       )}
-
-      {/* Cancel Confirmation */}
       {showCancelOverlay && (
         <CancelCreateNewEvent
           onConfirm={() => navigate("/dashboard")}
           onCancel={() => setShowCancelOverlay(false)}
         />
       )}
-
-      {/* ✅ Success Overlay for Saving Changes */}
       {showSaveSuccess && (
         <SaveChangesSuccess
           eventName={eventDetails.title}
