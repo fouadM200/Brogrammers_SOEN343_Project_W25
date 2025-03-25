@@ -53,3 +53,35 @@ exports.getPaymentDetails = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+exports.createFreePayment = async (req, res) => {
+    try {
+      const { userId } = req.user;
+      const { eventId } = req.body;
+      if (!eventId) {
+        return res.status(400).json({ error: "Missing eventId." });
+      }
+      const accessCode = generateUniqueCode();
+      const qrCode = generateUniqueCode();
+  
+      const newPayment = new Payment({
+        userId,
+        eventId,
+        amount: "Free",
+        cardHolderName: "",
+        cardLast4: "",
+        expiryDate: "",
+        accessCode,
+        qrCode
+      });
+  
+      await newPayment.save();
+      res
+        .status(201)
+        .json({ message: "Free payment processed successfully.", payment: newPayment });
+    } catch (error) {
+      console.error("Free payment error:", error);
+      res.status(500).json({ error: "Internal server error." });
+    }
+  };
