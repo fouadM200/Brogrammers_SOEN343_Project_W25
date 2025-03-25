@@ -160,17 +160,16 @@ const Auth = ({ onAuth }) => {
                 </div>
                 {formData.role === "attendee" && (
                   <div className="mb-4">
-                    <label className="block text-gray-600 mb-1">University (Required for Attendees)</label>
-                    <input
-                      type="text"
-                      name="university"
-                      value={formData.university}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded-md"
-                      placeholder="Enter university name"
-                      required
-                    />
-                  </div>
+                  <label className="block text-gray-600 mb-1">University (Optional)</label>
+                  <input
+                    type="text"
+                    name="university"
+                    value={formData.university}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Enter university name (optional)"
+                  />
+                </div>
                 )}
               </>
             )}

@@ -26,17 +26,20 @@ const PaymentScreen = () => {
   const [generatedQRData, setGeneratedQRData] = useState("");
 
   // 1) Determine the fee
-  const computeFee = () => {
-    if (!event || !event.registration) return "";
-    if (user && user.university) {
-      if (user.university.toLowerCase().includes("concordia")) {
-        return event.registration.concordiaStudents;
-      } else {
-        return event.registration.otherStudents || event.registration.regular;
-      }
-    }
+    const computeFee = () => {
+        if (!event || !event.registration) return "";
+        if (user && user.university && user.university.trim() !== "") {
+        if (user.university.toLowerCase().includes("concordia")) {
+            return event.registration.concordiaStudents;
+        } else {
+            return event.registration.otherStudents || event.registration.regular;
+        }
+        }
+
+    // If empty or no university, treat them as regular
     return event.registration.regular;
   };
+  
   const feeAmount = computeFee();
 
   // 2) Handle Payment
