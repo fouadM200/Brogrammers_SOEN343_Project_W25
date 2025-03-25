@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import SelectChatroom from "./SelectChatroom"; 
 import UserDashboard from './UserDashboard';
 import OrganizerDashboard from "./OrganizerDashboard";
+import AdminDashboard from "./AdminDashboard";
+import AdminEditEvent from "./AdminEditEvent";
 import Auth from "./Auth";
 import SignOut from "./SignOut";
 import Homepage from './Homepage';
@@ -17,11 +19,9 @@ import OnlineEventAccess from './OnlineEventAccess';
 import Profile from "./Profile";
 import PaymentScreen from "./PaymentScreen";
 
-
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Check for token + user in localStorage on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("currentUser"));
@@ -32,7 +32,6 @@ const App = () => {
     }
   }, []);
 
-  // Called after successful login/registration
   const handleAuth = () => {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("currentUser"));
@@ -41,7 +40,6 @@ const App = () => {
     }
   };
 
-  // Called on sign out
   const handleSignOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("currentUser");
@@ -51,7 +49,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-      <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/" element={<Homepage />} />
 
         <Route 
@@ -60,14 +58,32 @@ const App = () => {
             currentUser ? (
               currentUser.role === "organizer" ? (
                 <OrganizerDashboard user={currentUser} />
-              ) : (
+              ) : currentUser.role === "attendee" ? (
                 <UserDashboard />
+              ) : (
+                // if admin, force admin dashboard route below
+                <Navigate to="/admin" />
               )
             ) : (
               <Navigate to="/auth" />
             )
           }
         />
+
+        <Route path="/admin" element={
+          currentUser && currentUser.role === "admin" ? (
+            <AdminDashboard user={currentUser} />
+          ) : (
+            <Navigate to="/auth" />
+          )
+        }/>
+        <Route path="/admin/edit_event" element={
+          currentUser && currentUser.role === "admin" ? (
+            <AdminEditEvent />
+          ) : (
+            <Navigate to="/auth" />
+          )
+        }/>
 
         <Route path="/auth" element={<Auth onAuth={handleAuth} />} />
         <Route path="/signout" element={<SignOut onSignOut={handleSignOut} />} />
@@ -77,10 +93,9 @@ const App = () => {
         <Route path="/search_events" element={<SearchEvents user={currentUser} />} />
         <Route path="/event_description" element={<EventDescription user={currentUser} />} />
         <Route path="/create_event" element={<CreateEvent user={currentUser} />} />
-        <Route path="/online_event_access" element={<OnlineEventAccess />} />
         <Route path="/edit_event" element={<EditEvent />} />
+        <Route path="/online_event_access" element={<OnlineEventAccess />} />
         <Route path="/payment" element={<PaymentScreen />} />
-
       </Routes>
     </Router>
   );

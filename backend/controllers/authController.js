@@ -1,8 +1,8 @@
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
-// Register a new user
+// Register a new user (still hashed for normal users)
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role, university } = req.body;
@@ -36,13 +36,32 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    // If no user found:
+    if (!user) {
       return res.status(400).json({ error: "Invalid email or password." });
     }
 
-    const token = jwt.sign({ userId: user._id }, "your_secret_key", {
-      expiresIn: "1h",
-    });
+    // ---- CONDITIONAL CHECK ----
+    if (user.role === "admin") {
+      // ADMIN user is stored with plain-text password
+      if (user.password !== password) {
+        return res.status(400).json({ error: "Invalid email or password." });
+      }
+    } else {
+      // Normal user => do bcrypt compare
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Invalid email or password." });
+      }
+    }
+    // ----------------------------
+
+    // If we get here, the password matched
+    const token = jwt.sign(
+      { userId: user._id, role: user.role }, 
+      "your_secret_key",
+      { expiresIn: "1h" }
+    );
 
     return res.json({
       message: "Login successful",
@@ -53,7 +72,7 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
         university: user.university,
-        interests: user.interests || []
+        interests: user.interests || [],
       },
     });
   } catch (error) {
@@ -62,22 +81,16 @@ exports.login = async (req, res) => {
   }
 };
 
-
+// Update interests
 exports.updateInterests = async (req, res) => {
   try {
     const { email, interests } = req.body;
-
-    // Find the user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
-    // Update the user's interests
     user.interests = interests;
     await user.save();
-
-    // Return the updated user
     res.json(user);
   } catch (error) {
     console.error("Error updating interests:", error);
@@ -87,12 +100,11 @@ exports.updateInterests = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const { userId } = req.user; // userId is set by authMiddleware if you decode the token
+    const { userId } = req.user; 
     const user = await User.findById(userId).populate("registeredEvents");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    // Return the full user, including the populated events
     res.json(user);
   } catch (error) {
     console.error("Get profile error:", error);

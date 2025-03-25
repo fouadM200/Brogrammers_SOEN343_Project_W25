@@ -11,12 +11,11 @@ const Auth = ({ onAuth }) => {
     name: "",
     email: "",
     password: "",
-    role: "organizer",
+    role: "organizer", // default remains organizer for sign up; admin accounts are created manually
     university: "",
   });
 
   useEffect(() => {
-    // Check URL params to see if "signup=true" is present
     const params = new URLSearchParams(location.search);
     if (params.get("signup") === "true") {
       setIsSignUp(true);
@@ -31,7 +30,6 @@ const Auth = ({ onAuth }) => {
     e.preventDefault();
     try {
       if (isSignUp) {
-        // === Register flow ===
         const res = await fetch("http://localhost:5000/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -54,7 +52,6 @@ const Auth = ({ onAuth }) => {
         setIsSignUp(false);
 
       } else {
-        // === Login flow ===
         const res = await fetch("http://localhost:5000/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -70,18 +67,17 @@ const Auth = ({ onAuth }) => {
           return;
         }
 
-        // On success: we get { message, token, user }
         const data = await res.json();
-
-        // Save token & user in localStorage
         localStorage.setItem("token", data.token);
         localStorage.setItem("currentUser", JSON.stringify(data.user));
-
-        // Let parent know we are authenticated
         onAuth();
 
-        // Navigate to dashboard
-        navigate("/dashboard");
+        // If the user is an admin, navigate to the admin dashboard.
+        if (data.user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error) {
       console.error("Auth error:", error);
@@ -91,21 +87,17 @@ const Auth = ({ onAuth }) => {
 
   return (
     <div className="flex h-screen relative">
-      {/* Home Icon - Click to go home */}
       <div 
         className="absolute top-4 left-4 cursor-pointer text-2xl font-bold text-black"
         onClick={() => navigate("/")}
       >
         Logo
       </div>
-
-      {/* Left Section - Form */}
       <div className="w-1/2 flex items-center justify-center bg-blue-200">
         <div className="w-full max-w-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
             {isSignUp ? "Create an account" : "Sign in to your account"}
           </h2>
-
           <form onSubmit={handleSubmit}>
             {isSignUp && (
               <div className="mb-4">
@@ -142,8 +134,6 @@ const Auth = ({ onAuth }) => {
                 required
               />
             </div>
-
-            {/* Role selection */}
             {isSignUp && (
               <>
                 <div className="mb-4">
@@ -156,24 +146,24 @@ const Auth = ({ onAuth }) => {
                   >
                     <option value="organizer">Organizer</option>
                     <option value="attendee">Attendee</option>
+                    {/* Do not show admin option in sign up */}
                   </select>
                 </div>
                 {formData.role === "attendee" && (
                   <div className="mb-4">
-                  <label className="block text-gray-600 mb-1">University (Optional)</label>
-                  <input
-                    type="text"
-                    name="university"
-                    value={formData.university}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded-md"
-                    placeholder="Enter university name (optional)"
-                  />
-                </div>
+                    <label className="block text-gray-600 mb-1">University (Optional)</label>
+                    <input
+                      type="text"
+                      name="university"
+                      value={formData.university}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Enter university name (optional)"
+                    />
+                  </div>
                 )}
               </>
             )}
-
             <div className="flex items-center justify-between mb-4">
               <label className="flex items-center text-gray-600 text-sm">
                 <input type="checkbox" className="mr-2" /> Remember me
@@ -185,7 +175,6 @@ const Auth = ({ onAuth }) => {
                 Forgot password?
               </span>
             </div>
-
             <button
               type="submit"
               className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
@@ -193,8 +182,6 @@ const Auth = ({ onAuth }) => {
               {isSignUp ? "Sign Up" : "Sign in"}
             </button>
           </form>
-
-          {/* Toggle between Sign in / Sign up */}
           <p className="mt-4 text-center text-gray-500">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <span
@@ -206,8 +193,6 @@ const Auth = ({ onAuth }) => {
           </p>
         </div>
       </div>
-
-      {/* Right Section - Image */}
       <div className="w-1/2 hidden md:block">
         <img
           src="https://www.theeventplannerexpo.com/wp-content/uploads/2023/12/alexandre-pellaes-6vAjp0pscX0-unsplash.jpg"
