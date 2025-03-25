@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+// src/PaymentScreen.jsx
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
+import PaymentConfirmationOverlay from "./PaymentConfirmationOverlay";
 
 const PaymentScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // Expecting event and user in location.state
+  // Expect event and user passed via location state
   const { event, user } = location.state || {};
 
-  // Sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -21,9 +22,12 @@ const PaymentScreen = () => {
   const [cvv, setCvv] = useState("");
   const [processing, setProcessing] = useState(false);
 
-  // Compute the correct fee based on the user's university affiliation.
-  // If the user's university contains "concordia" (case-insensitive), use concordiaStudents price.
-  // Otherwise, if a university is provided, use otherStudents price; if not, fallback to regular price.
+  // Overlay state for payment confirmation
+  const [showConfirmationOverlay, setShowConfirmationOverlay] = useState(false);
+  const [generatedAccessCode, setGeneratedAccessCode] = useState("");
+  const [generatedQRData, setGeneratedQRData] = useState("");
+
+  // Compute fee based on user university affiliation
   const computeFee = () => {
     if (!event || !event.registration) return "";
     if (user && user.university) {
@@ -36,17 +40,14 @@ const PaymentScreen = () => {
     return event.registration.regular;
   };
 
-
   const feeAmount = computeFee();
 
-  // Handle form submission for payment
   const handlePayment = async (e) => {
     e.preventDefault();
     if (!event || !user) {
       alert("Missing event or user information.");
       return;
     }
-    // Basic validation for card info fields
     if (!cardHolderName || !cardNumber || !expiryDate || !cvv) {
       alert("Please fill in all credit card details.");
       return;
@@ -63,8 +64,6 @@ const PaymentScreen = () => {
         setProcessing(false);
         return;
       }
-
-      // Send payment details to the backend
       const paymentResponse = await fetch("http://localhost:5000/api/payments", {
         method: "POST",
         headers: {
@@ -80,15 +79,17 @@ const PaymentScreen = () => {
           cvv,
         }),
       });
-
       if (!paymentResponse.ok) {
         const errorData = await paymentResponse.json();
         throw new Error(errorData.error || "Payment failed.");
       }
+      const paymentData = await paymentResponse.json();
+      // Set the unique codes returned from the backend
+      setGeneratedAccessCode(paymentData.payment.accessCode);
+      setGeneratedQRData(paymentData.payment.qrCode)
 
-      alert("Payment processed successfully.");
-
-      await registerForEvent();
+      // Show the confirmation overlay
+      setShowConfirmationOverlay(true);
     } catch (error) {
       console.error("Error processing payment:", error);
       alert("Payment error: " + error.message);
@@ -97,7 +98,7 @@ const PaymentScreen = () => {
     }
   };
 
-  // Function to register the event for the user after successful payment
+  // Register the event for the user after successful payment
   const registerForEvent = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -123,6 +124,12 @@ const PaymentScreen = () => {
       console.error("Error registering for event:", error);
       alert("Registration error: " + error.message);
     }
+  };
+
+  // When overlay is closed, hide it and register the event
+  const closeConfirmationOverlay = async () => {
+    setShowConfirmationOverlay(false);
+    await registerForEvent();
   };
 
   return (
@@ -151,7 +158,6 @@ const PaymentScreen = () => {
               {feeAmount.toLowerCase() === "free" ? "Free" : `$${feeAmount} CAD`}
             </span>
           </p>
-
           <form onSubmit={handlePayment} className="max-w-md bg-white p-6 rounded shadow-md">
             <div className="mb-4">
               <label className="block text-gray-700 mb-1">Cardholder Name</label>
@@ -207,7 +213,6 @@ const PaymentScreen = () => {
               {processing ? "Processing Payment..." : "Submit Payment"}
             </button>
           </form>
-
           <button
             onClick={() => navigate("/event_description", { state: { event, user } })}
             className="mt-4 px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 transition"
@@ -228,6 +233,16 @@ const PaymentScreen = () => {
             onCancel={() => setShowConfirm(false)}
           />
         </div>
+      )}
+
+      {/* Payment Confirmation Overlay */}
+      {showConfirmationOverlay && (
+        <PaymentConfirmationOverlay
+          event={event}
+          accessCode={generatedAccessCode}
+          qrData={generatedQRData}
+          onClose={closeConfirmationOverlay}
+        />
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import UserSideMenuBar from "./UserSideMenuBar";
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -9,14 +9,33 @@ import { ClipboardPaste } from "lucide-react";
 export default function OnlineEventAccess() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [accessCode, setAccessCode] = useState("");
+  const [correctCode, setCorrectCode] = useState(""); // state to store actual code
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailure, setShowFailure] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { eventName, user } = location.state || {};
+  // Expect event and user objects passed via location state
+  const { event, user } = location.state || {};
 
-  const correctCode = "ABCD1234"; // ✅ Hardcoded valid code for now
+  // Fetch the correct code from the backend (using your payments API)
+  useEffect(() => {
+    if (event && user) {
+      const token = localStorage.getItem("token");
+      fetch(`http://localhost:5000/api/payments?eventId=${event._id}&userId=${user._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.length > 0) {
+            setCorrectCode(data[0].accessCode);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching payment details:", error);
+        });
+    }
+  }, [event, user]);
 
   const handlePaste = async () => {
     try {
@@ -28,7 +47,8 @@ export default function OnlineEventAccess() {
   };
 
   const handleAccess = () => {
-    if (accessCode.trim().toUpperCase() === correctCode) {
+    // Compare user input with the fetched correct code
+    if (accessCode.trim() === correctCode) {
       setShowSuccess(true);
     } else {
       setShowFailure(true);
@@ -55,11 +75,13 @@ export default function OnlineEventAccess() {
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <main className="p-6 bg-gray-100 flex-1">
-          <h1 className="text-3xl font-bold text-left mb-1">{eventName || "Online Event"}</h1>
+          <h1 className="text-3xl font-bold text-left mb-1">
+            {event?.title || "Online Event"}
+          </h1>
           <hr className="mb-6 border-gray-300" />
 
           <p className="text-lg font-medium text-gray-700 mb-4">
-            Insert your access code for <strong>{eventName}</strong> event:
+            Insert your access code for <strong>{event?.title}</strong> event:
           </p>
 
           <div className="relative mb-6 max-w-md">
@@ -96,15 +118,15 @@ export default function OnlineEventAccess() {
         </main>
       </div>
 
-      {/* ✅ Success Overlay */}
+      {/* Success Overlay */}
       {showSuccess && (
         <AccessEventSuccess onOk={() => setShowSuccess(false)} />
       )}
 
-      {/* ❌ Failure Overlay */}
+      {/* Failure Overlay */}
       {showFailure && (
         <AccessEventFailed
-          eventName={eventName}
+          eventName={event?.title}
           onOk={() => setShowFailure(false)}
         />
       )}

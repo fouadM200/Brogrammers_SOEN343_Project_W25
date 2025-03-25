@@ -11,7 +11,7 @@ export default function UserDashboard() {
   const [allEvents, setAllEvents] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAccessCode, setShowAccessCode] = useState(false);
-  const [selectedEventName, setSelectedEventName] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const navigate = useNavigate();
 
   // 1) Fetch user profile & all events from the backend
@@ -152,27 +152,37 @@ export default function UserDashboard() {
                       Time: {event.startTime}{" "}
                       {event.endTime && `- ${event.endTime}`}
                     </p>
+                    <p className="text-gray-500">
+                      Mode:{" "}
+                      {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
+                      {(event.mode === "in-person" || event.mode === "hybrid") &&
+                      event.room
+                        ? ` | Room: ${event.room}`
+                        : ""}
+                    </p>
                   </div>
                   <div className="flex flex-col gap-2 ml-6">
                     <button
                       className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
                       onClick={() => {
-                        setSelectedEventName(event.title);
+                        setSelectedEvent(event);
                         setShowAccessCode(true);
                       }}
                     >
                       Event Entry Details
                     </button>
-                    <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      onClick={() =>
-                        navigate("/online_event_access", {
-                          state: { eventName: event.title, user: currentUser },
-                        })
-                      }
-                    >
-                      Access Event
-                    </button>
+                    {(event.mode.toLowerCase() === "online" || event.mode.toLowerCase() === "hybrid") && (
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        onClick={() =>
+                          navigate("/online_event_access", {
+                            state: { event, user: currentUser },
+                          })
+                        }
+                      >
+                        Access Event
+                      </button>
+                    )}
                     <button
                       className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                       onClick={() => handleLeave(event._id)}
@@ -264,9 +274,10 @@ export default function UserDashboard() {
       )}
 
       {/* Access Code Overlay */}
-      {showAccessCode && (
+      {showAccessCode && selectedEvent && currentUser && (
         <DisplayAccessCode
-          eventName={selectedEventName}
+          event={selectedEvent}
+          user={currentUser}
           onOk={() => setShowAccessCode(false)}
         />
       )}
