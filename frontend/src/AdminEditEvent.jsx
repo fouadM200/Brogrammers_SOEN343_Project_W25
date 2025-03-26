@@ -1,7 +1,7 @@
 // src/AdminEditEvent.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AdminSideMenuBar from "./AdminSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use singleton instead of OrganizerSideMenuBar
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import CancelCreateNewEvent from "./CancelCreateNewEvent";
@@ -56,6 +56,7 @@ const AdminEditEvent = () => {
         },
       }));
     } else if (name === "otherStudents" || name === "concordiaStudents") {
+      // Prevent manual edits
       return;
     } else if (name in eventDetails.registration) {
       setEventDetails((prev) => ({
@@ -73,6 +74,7 @@ const AdminEditEvent = () => {
     }
   };
 
+  // Handle saving changes by calling the backend update endpoint.
   const handleSaveChanges = async () => {
     const { title, date, startTime, location } = eventDetails;
     if (!title || !date || !startTime || !location) {
@@ -89,7 +91,7 @@ const AdminEditEvent = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(eventDetails),
       });
@@ -105,20 +107,30 @@ const AdminEditEvent = () => {
     }
   };
 
+  // Retrieve the sidebar via the singleton.
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
+      {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"}`}
+        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-64"
+        }`}
       >
-        <AdminSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+        {sidebar}
       </div>
-      <div className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+      {/* Main Content */}
+      <div
+        className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "ml-64" : "ml-0"
+        }`}
+      >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="p-6">
           <h1 className="text-3xl font-bold text-left mb-2">Edit Event (Admin)</h1>
           <hr className="border-gray-300 mb-6" />
           <div className="w-full max-w-5xl">
-            {/* (Reuse form fields from your EditEvent component.) */}
             {/* Title & Speaker */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
@@ -206,7 +218,7 @@ const AdminEditEvent = () => {
                 />
               </div>
             </div>
-            {/* Room */}
+            {/* Room (for in-person/hybrid) */}
             {(eventDetails.mode === "in-person" || eventDetails.mode === "hybrid") && (
               <div className="mb-4">
                 <label className="block mb-1 font-medium">Room Number:</label>
@@ -273,7 +285,7 @@ const AdminEditEvent = () => {
                 name="tags"
                 value={eventDetails.tags.join(", ")}
                 onChange={(e) => {
-                  const tagsArray = e.target.value.split(",").map(tag => tag.trim());
+                  const tagsArray = e.target.value.split(",").map((tag) => tag.trim());
                   setEventDetails((prev) => ({
                     ...prev,
                     tags: tagsArray,
@@ -301,6 +313,7 @@ const AdminEditEvent = () => {
           </div>
         </div>
       </div>
+      {/* Overlays */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <QuitConfirmation
@@ -329,3 +342,4 @@ const AdminEditEvent = () => {
 };
 
 export default AdminEditEvent;
+

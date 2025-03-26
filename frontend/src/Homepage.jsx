@@ -5,6 +5,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import Feature from "./Feature";
 import { useNavigate } from "react-router-dom";
+import logo from "./assets/Version3.png";
 
 const members = [
     {
@@ -99,7 +100,8 @@ const Homepage = () => {
     <div className="font-sans">
         {/* Navigation Bar */}
         <nav className="fixed top-0 left-0 w-full py-4 px-8 flex justify-between items-center shadow-lg bg-black z-50 transition-all duration-300">
-        <h1 className="text-2xl font-bold text-white">Logo</h1>
+        <img src={logo} alt="Logo" className="h-16 w-auto" />
+
         <div className="flex space-x-6">
         {[
             { id: "home", label: "Home" },

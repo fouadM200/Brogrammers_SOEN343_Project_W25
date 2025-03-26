@@ -1,6 +1,7 @@
 // src/Auth.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import logo from "./assets/Version3.png";
 
 const Auth = ({ onAuth }) => {
   const navigate = useNavigate();
@@ -87,13 +88,13 @@ const Auth = ({ onAuth }) => {
 
   return (
     <div className="flex h-screen relative">
-      <div 
-        className="absolute top-4 left-4 cursor-pointer text-2xl font-bold text-black"
-        onClick={() => navigate("/")}
-      >
-        Logo
-      </div>
-      <div className="w-1/2 flex items-center justify-center bg-blue-200">
+     <div 
+       className="absolute top-4 left-4 cursor-pointer"
+       onClick={() => navigate("/")}
+       >
+        <img src={logo} alt="Logo" className="h-16 w-auto" />
+     </div>
+      <div className="w-1/2 flex items-center justify-center bg-blue-300">
         <div className="w-full max-w-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
             {isSignUp ? "Create an account" : "Sign in to your account"}

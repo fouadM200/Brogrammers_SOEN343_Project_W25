@@ -1,6 +1,7 @@
+// src/PaymentScreen.jsx
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import UserSideMenuBar from "./UserSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use the singleton instead of direct UserSideMenuBar import
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import PaymentConfirmationOverlay from "./PaymentConfirmationOverlay";
@@ -26,20 +27,19 @@ const PaymentScreen = () => {
   const [generatedQRData, setGeneratedQRData] = useState("");
 
   // 1) Determine the fee
-    const computeFee = () => {
-        if (!event || !event.registration) return "";
-        if (user && user.university && user.university.trim() !== "") {
-        if (user.university.toLowerCase().includes("concordia")) {
-            return event.registration.concordiaStudents;
-        } else {
-            return event.registration.otherStudents || event.registration.regular;
-        }
-        }
-
+  const computeFee = () => {
+    if (!event || !event.registration) return "";
+    if (user && user.university && user.university.trim() !== "") {
+      if (user.university.toLowerCase().includes("concordia")) {
+        return event.registration.concordiaStudents;
+      } else {
+        return event.registration.otherStudents || event.registration.regular;
+      }
+    }
     // If empty or no university, treat them as regular
     return event.registration.regular;
   };
-  
+
   const feeAmount = computeFee();
 
   // 2) Handle Payment
@@ -149,6 +149,10 @@ const PaymentScreen = () => {
     }
   };
 
+  // Get the sidebar component via the singleton.
+  // This ensures the appropriate sidebar is used based on the user's role.
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
@@ -157,7 +161,7 @@ const PaymentScreen = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+        {sidebar}
       </div>
 
       {/* Main Content */}
@@ -185,8 +189,7 @@ const PaymentScreen = () => {
           {feeAmount.toLowerCase() === "free" ? (
             <div className="max-w-md bg-white p-6 rounded shadow-md">
               <p className="mb-4 text-lg">
-                No payment required for Concordia students. Click below to
-                finalize registration.
+                No payment required for Concordia students. Click below to finalize registration.
               </p>
               <button
                 type="button"

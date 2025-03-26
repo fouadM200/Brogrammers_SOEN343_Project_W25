@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+// src/OrganizerDashboard.jsx
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import OrganizerSideMenuBar from "./OrganizerSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use singleton for sidebar
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import DeleteEvent from "./DeleteEvent";
@@ -99,6 +100,10 @@ export default function OrganizerDashboard({ user }) {
     setShowRegistrationOverlay(true);
   };
 
+  // Get the sidebar via the singleton.
+  // This will render the organizer sidebar since the user role is "organizer".
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
@@ -107,10 +112,7 @@ export default function OrganizerDashboard({ user }) {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <OrganizerSideMenuBar
-          user={user}
-          onSignOut={() => setShowConfirm(true)}
-        />
+        {sidebar}
       </div>
 
       {/* Main Content */}
