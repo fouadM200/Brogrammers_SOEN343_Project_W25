@@ -1,6 +1,7 @@
-import { useState } from "react";
+// src/CreateEvent.jsx
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import OrganizerSideMenuBar from "./OrganizerSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Import the singleton instead of OrganizerSideMenuBar
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import CancelCreateNewEvent from "./CancelCreateNewEvent";
@@ -29,7 +30,7 @@ const CreateEvent = ({ user }) => {
       concordiaStudents: "Free",
     },
     description: "",
-    tags: [], // Add tags as an empty array
+    tags: [],
   });
 
   const handleChange = (e) => {
@@ -45,10 +46,7 @@ const CreateEvent = ({ user }) => {
           concordiaStudents: "Free",
         },
       }));
-    } else if (
-      name === "otherStudents" ||
-      name === "concordiaStudents"
-    ) {
+    } else if (name === "otherStudents" || name === "concordiaStudents") {
       return;
     } else if (name in eventDetails.registration) {
       setEventDetails((prev) => ({
@@ -101,15 +99,27 @@ const CreateEvent = ({ user }) => {
     }
   };
 
+  // Get the sidebar via the singleton.
+  // The onSignOut callback here triggers the quit confirmation modal.
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
-      <div className={`fixed top-0 left-0 min-h-screen w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"}`}>
-        <OrganizerSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+      <div
+        className={`fixed top-0 left-0 min-h-screen w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-64"
+        }`}
+      >
+        {sidebar}
       </div>
 
       {/* Main Content */}
-      <div className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+      <div
+        className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "ml-64" : "ml-0"
+        }`}
+      >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="p-6 min-h-screen bg-gray-100">
           <h1 className="text-3xl font-bold text-left mb-2">Create a New Event</h1>
@@ -119,11 +129,25 @@ const CreateEvent = ({ user }) => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block mb-1 font-medium">Event Title:</label>
-                <input type="text" name="title" value={eventDetails.title} onChange={handleChange} className="p-3 border rounded w-full" required />
+                <input
+                  type="text"
+                  name="title"
+                  value={eventDetails.title}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                  required
+                />
               </div>
               <div>
                 <label className="block mb-1 font-medium">Speaker Name:</label>
-                <input type="text" name="speaker" value={eventDetails.speaker} onChange={handleChange} className="p-3 border rounded w-full" required />
+                <input
+                  type="text"
+                  name="speaker"
+                  value={eventDetails.speaker}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                  required
+                />
               </div>
             </div>
 
@@ -131,15 +155,35 @@ const CreateEvent = ({ user }) => {
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block mb-1 font-medium">Event Date:</label>
-                <input type="date" name="date" value={eventDetails.date} onChange={handleChange} className="p-3 border rounded w-full" required />
+                <input
+                  type="date"
+                  name="date"
+                  value={eventDetails.date}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                  required
+                />
               </div>
               <div>
                 <label className="block mb-1 font-medium">Start Time:</label>
-                <input type="time" name="startTime" value={eventDetails.startTime} onChange={handleChange} className="p-3 border rounded w-full" required />
+                <input
+                  type="time"
+                  name="startTime"
+                  value={eventDetails.startTime}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                  required
+                />
               </div>
               <div>
                 <label className="block mb-1 font-medium">End Time:</label>
-                <input type="time" name="endTime" value={eventDetails.endTime} onChange={handleChange} className="p-3 border rounded w-full" />
+                <input
+                  type="time"
+                  name="endTime"
+                  value={eventDetails.endTime}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                />
               </div>
             </div>
 
@@ -147,7 +191,12 @@ const CreateEvent = ({ user }) => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block mb-1 font-medium">Event Mode:</label>
-                <select name="mode" value={eventDetails.mode} onChange={handleChange} className="p-3 border rounded w-full">
+                <select
+                  name="mode"
+                  value={eventDetails.mode}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                >
                   <option value="Online">Online</option>
                   <option value="In-person">In-Person</option>
                   <option value="Hybrid">Hybrid</option>
@@ -155,15 +204,28 @@ const CreateEvent = ({ user }) => {
               </div>
               <div>
                 <label className="block mb-1 font-medium">Event Location:</label>
-                <input type="text" name="location" value={eventDetails.location} onChange={handleChange} className="p-3 border rounded w-full" required />
+                <input
+                  type="text"
+                  name="location"
+                  value={eventDetails.location}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                  required
+                />
               </div>
             </div>
 
             {/* Room (for in-person/hybrid) */}
-            {(eventDetails.mode === "in-person" || eventDetails.mode === "hybrid") && (
+            {(eventDetails.mode === "In-person" || eventDetails.mode === "Hybrid") && (
               <div className="mb-4">
                 <label className="block mb-1 font-medium">Room Number:</label>
-                <input type="text" name="room" value={eventDetails.room} onChange={handleChange} className="w-full p-3 border rounded" />
+                <input
+                  type="text"
+                  name="room"
+                  value={eventDetails.room}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded"
+                />
               </div>
             )}
 
@@ -173,15 +235,45 @@ const CreateEvent = ({ user }) => {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block mb-1 text-sm">Regular Attendee:</label>
-                  <input type="text" inputMode="decimal" pattern="^\d+(\.\d{0,2})?$" name="regular" value={eventDetails.registration.regular} onChange={handleChange} onBlur={(e) => !isNaN(parseFloat(e.target.value)) && setEventDetails(prev => ({ ...prev, registration: { ...prev.registration, regular: parseFloat(e.target.value).toFixed(2) } }))} className="p-3 border rounded w-full" />
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^\d+(\.\d{0,2})?$"
+                    name="regular"
+                    value={eventDetails.registration.regular}
+                    onChange={handleChange}
+                    onBlur={(e) =>
+                      !isNaN(parseFloat(e.target.value)) &&
+                      setEventDetails((prev) => ({
+                        ...prev,
+                        registration: {
+                          ...prev.registration,
+                          regular: parseFloat(e.target.value).toFixed(2),
+                        },
+                      }))
+                    }
+                    className="p-3 border rounded w-full"
+                  />
                 </div>
                 <div>
                   <label className="block mb-1 text-sm">Other University Students:</label>
-                  <input type="text" name="otherStudents" value={eventDetails.registration.otherStudents} readOnly className="p-3 border rounded w-full bg-gray-50 text-gray-700 cursor-not-allowed" />
+                  <input
+                    type="text"
+                    name="otherStudents"
+                    value={eventDetails.registration.otherStudents}
+                    readOnly
+                    className="p-3 border rounded w-full bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
                 </div>
                 <div>
                   <label className="block mb-1 text-sm">Concordia Students:</label>
-                  <input type="text" name="concordiaStudents" value="Free" readOnly className="p-3 border rounded w-full bg-gray-50 text-gray-700 cursor-not-allowed" />
+                  <input
+                    type="text"
+                    name="concordiaStudents"
+                    value="Free"
+                    readOnly
+                    className="p-3 border rounded w-full bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
                 </div>
               </div>
             </div>
@@ -189,7 +281,12 @@ const CreateEvent = ({ user }) => {
             {/* Description */}
             <div className="mb-4">
               <label className="block mb-1 font-medium">Event Description:</label>
-              <textarea name="description" value={eventDetails.description} onChange={handleChange} className="w-full h-40 p-3 border rounded"></textarea>
+              <textarea
+                name="description"
+                value={eventDetails.description}
+                onChange={handleChange}
+                className="w-full h-40 p-3 border rounded"
+              ></textarea>
             </div>
 
             {/* Tags */}
@@ -200,7 +297,7 @@ const CreateEvent = ({ user }) => {
                 name="tags"
                 value={eventDetails.tags.join(", ")}
                 onChange={(e) => {
-                  const tagsArray = e.target.value.split(",").map(tag => tag.trim());
+                  const tagsArray = e.target.value.split(",").map((tag) => tag.trim());
                   setEventDetails((prev) => ({
                     ...prev,
                     tags: tagsArray,
@@ -213,10 +310,16 @@ const CreateEvent = ({ user }) => {
 
             {/* Buttons */}
             <div className="flex gap-4">
-              <button onClick={() => setShowCancelOverlay(true)} className="flex-1 bg-gray-800 text-white p-3 rounded-md hover:bg-gray-900">
+              <button
+                onClick={() => setShowCancelOverlay(true)}
+                className="flex-1 bg-gray-800 text-white p-3 rounded-md hover:bg-gray-900"
+              >
                 Cancel
               </button>
-              <button onClick={handleCreateEvent} className="flex-1 bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600">
+              <button
+                onClick={handleCreateEvent}
+                className="flex-1 bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600"
+              >
                 Create Event
               </button>
             </div>
@@ -227,11 +330,20 @@ const CreateEvent = ({ user }) => {
       {/* Overlays for confirmations and success */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <QuitConfirmation onConfirm={() => { setShowConfirm(false); navigate("/auth"); }} onCancel={() => setShowConfirm(false)} />
+          <QuitConfirmation
+            onConfirm={() => {
+              setShowConfirm(false);
+              navigate("/auth");
+            }}
+            onCancel={() => setShowConfirm(false)}
+          />
         </div>
       )}
       {showCancelOverlay && (
-        <CancelCreateNewEvent onConfirm={() => navigate("/dashboard")} onCancel={() => setShowCancelOverlay(false)} />
+        <CancelCreateNewEvent
+          onConfirm={() => navigate("/dashboard")}
+          onCancel={() => setShowCancelOverlay(false)}
+        />
       )}
       {showSuccessOverlay && (
         <CreateNewEventSuccess onOk={() => navigate("/dashboard")} />

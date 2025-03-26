@@ -1,6 +1,6 @@
 // src/SearchEvents.jsx
 import React, { useState, useEffect } from "react";
-import UserSideMenuBar from "./UserSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use singleton instead of direct UserSideMenuBar import
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import { Search } from "lucide-react";
@@ -73,6 +73,10 @@ const SearchEvents = ({ user }) => {
     setSearchTriggered(true);
   };
 
+  // Get the sidebar from the singleton using the current profile.
+  // The onSignOut callback triggers the logout confirmation.
+  const sidebar = SidebarSingleton.getInstance(profile, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
@@ -81,7 +85,7 @@ const SearchEvents = ({ user }) => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={profile} onSignOut={() => setShowConfirm(true)} />
+        {sidebar}
       </div>
 
       {/* Main Content */}

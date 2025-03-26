@@ -1,9 +1,10 @@
 import React from 'react';
 import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline';
+import logo from "./assets/Version3.png";
 
 export default function HeaderMenuBar({ toggleSidebar }) {
   return (
-    <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+    <header className="bg-gray-400 shadow-sm p-4 flex justify-between items-center">
     {/* 3-Dashed Lines (Menu Button) */}
       <button
         className="p-2 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-indigo-500"
@@ -13,7 +14,7 @@ export default function HeaderMenuBar({ toggleSidebar }) {
       </button>
 
       {/* Logo Text (Centered) */}
-      <h1 className="text-xl font-bold">Logo</h1>
+      <img src={logo} alt="Logo" className="h-16 w-auto" />
 
       {/* Notification Bell (Right Side) */}
       <button className="p-2 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-indigo-500">

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+// src/Profile.jsx
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import UserSideMenuBar from "./UserSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use singleton for sidebar
 
 export default function Profile() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -63,11 +64,15 @@ export default function Profile() {
     await updateUserInterests(updatedInterests);
   };
 
+  // Get the sidebar component via the singleton.
+  // If currentUser is not set yet, the singleton will render the default behavior.
+  const sidebar = SidebarSingleton.getInstance(currentUser, () => navigate("/auth")).getSidebar();
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-64 bg-gray-800 text-white">
-        <UserSideMenuBar user={currentUser} onSignOut={() => navigate("/auth")} />
+        {sidebar}
       </div>
 
       {/* Main Content */}

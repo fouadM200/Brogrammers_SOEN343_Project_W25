@@ -1,6 +1,7 @@
+// src/OnlineEventAccess.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import UserSideMenuBar from "./UserSideMenuBar";
+import { useLocation, useNavigate } from "react-router-dom";
+import SidebarSingleton from "./SidebarSingleton"; // Use singleton for sidebar
 import HeaderMenuBar from "./HeaderMenuBar";
 import AccessEventSuccess from "./AccessEventSuccess";
 import AccessEventFailed from "./AccessEventFailed";
@@ -55,6 +56,10 @@ export default function OnlineEventAccess() {
     }
   };
 
+  // Get the sidebar via the singleton.
+  // This ensures that the appropriate sidebar is rendered based on the user's role.
+  const sidebar = SidebarSingleton.getInstance(user, () => navigate("/auth")).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
@@ -63,7 +68,7 @@ export default function OnlineEventAccess() {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={user} onSignOut={() => navigate("/auth")} />
+        {sidebar}
       </div>
 
       {/* Main Content */}

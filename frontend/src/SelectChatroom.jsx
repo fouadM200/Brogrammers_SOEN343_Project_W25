@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import UserSideMenuBar from "./UserSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // New import for singleton
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 
@@ -8,6 +8,10 @@ const SelectChatroom = ({ user, onSignOut }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
+
+  // Retrieve the sidebar component via the singleton.
+  // The onSignOut behavior is set to trigger the logout confirmation.
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
 
   const events = ["Event 1", "Event 2", "Event 3"];
   const speakers = ["Alice Smith", "Bob Johnson", "Charlie Lee"];
@@ -20,7 +24,7 @@ const SelectChatroom = ({ user, onSignOut }) => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+        {sidebar}
       </div>
 
       {/* Main Content */}

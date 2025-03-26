@@ -1,7 +1,7 @@
 // src/AdminDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminSideMenuBar from "./AdminSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use singleton for sidebar
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 
@@ -11,29 +11,32 @@ const AdminDashboard = ({ user }) => {
   const [users, setUsers] = useState([]);
   const [payments, setPayments] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
+  // Fetch data based on active tab
   useEffect(() => {
-    if (activeTab === "events") {
-      fetch("http://localhost:5000/api/admin/events", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => setEvents(data));
-    } else if (activeTab === "users") {
-      fetch("http://localhost:5000/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => setUsers(data));
-    } else if (activeTab === "payments") {
-      fetch("http://localhost:5000/api/admin/payments", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => setPayments(data));
-    }
+    if (!token) return;
+    const fetchData = async () => {
+      let endpoint = "";
+      if (activeTab === "events") endpoint = "events";
+      else if (activeTab === "users") endpoint = "users";
+      else if (activeTab === "payments") endpoint = "payments";
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/admin/${endpoint}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (activeTab === "events") setEvents(data);
+        else if (activeTab === "users") setUsers(data);
+        else if (activeTab === "payments") setPayments(data);
+      } catch (error) {
+        console.error(`Error fetching ${activeTab}:`, error);
+      }
+    };
+    fetchData();
   }, [activeTab, token]);
 
   const handleDeleteEvent = async (id) => {
@@ -60,106 +63,161 @@ const AdminDashboard = ({ user }) => {
     setPayments(payments.filter((p) => p._id !== id));
   };
 
+  // Retrieve the sidebar via the singleton.
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
+
   return (
-    <div className="flex h-screen relative">
-      <AdminSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
-      <div className="flex-1">
-        <HeaderMenuBar toggleSidebar={() => {}} />
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {sidebar}
+      </div>
+
+      {/* Main Content */}
+      <div
+        className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}
+      >
+        <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="p-6">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <div className="mt-4 flex gap-4">
-            <button
-              onClick={() => setActiveTab("events")}
-              className={`px-4 py-2 ${activeTab === "events" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-            >
-              Events
-            </button>
-            <button
-              onClick={() => setActiveTab("users")}
-              className={`px-4 py-2 ${activeTab === "users" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-            >
-              Users
-            </button>
-            <button
-              onClick={() => setActiveTab("payments")}
-              className={`px-4 py-2 ${activeTab === "payments" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-            >
-              Payments
-            </button>
+          <h1 className="text-4xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
+
+          {/* Tab Navigation */}
+          <div className="flex space-x-4 mb-6">
+            {["events", "users", "payments"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  activeTab === tab
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
           </div>
-          <div className="mt-6">
+
+          {/* Tab Content */}
+          <div>
             {activeTab === "events" && (
               <div>
-                <h2 className="text-2xl font-semibold">All Events</h2>
-                <ul>
-                  {events.map((event) => (
-                    <li key={event._id} className="border p-4 my-2">
-                      <p><strong>{event.title}</strong></p>
-                      <p>{event.speaker}</p>
-                      <button
-                        onClick={() =>
-                          navigate("/admin/edit_event", { state: { event } })
-                        }
-                        className="bg-yellow-500 text-white px-2 py-1 mr-2"
+                <h2 className="text-2xl font-semibold mb-4">All Events</h2>
+                {events.length === 0 ? (
+                  <p className="text-gray-600">No events available.</p>
+                ) : (
+                  <ul className="space-y-4">
+                    {events.map((event) => (
+                      <li
+                        key={event._id}
+                        className="bg-white p-4 rounded-md shadow hover:shadow-lg transition-shadow"
                       >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEvent(event._id)}
-                        className="bg-red-500 text-white px-2 py-1"
-                      >
-                        Delete
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-800">
+                              {event.title}
+                            </h3>
+                            <p className="text-gray-600">{event.speaker}</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() =>
+                                navigate("/admin/edit_event", { state: { event, user } })
+                              }
+                              className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteEvent(event._id)}
+                              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
             {activeTab === "users" && (
               <div>
-                <h2 className="text-2xl font-semibold">All Users</h2>
-                <ul>
-                  {users.map((u) => (
-                    <li key={u._id} className="border p-4 my-2">
-                      <p>
-                        <strong>{u.name}</strong> - {u.email} - {u.role}
-                      </p>
-                      <button
-                        onClick={() => handleDeleteUser(u._id)}
-                        className="bg-red-500 text-white px-2 py-1"
+                <h2 className="text-2xl font-semibold mb-4">All Users</h2>
+                {users.length === 0 ? (
+                  <p className="text-gray-600">No users found.</p>
+                ) : (
+                  <ul className="space-y-4">
+                    {users.map((u) => (
+                      <li
+                        key={u._id}
+                        className="bg-white p-4 rounded-md shadow hover:shadow-lg transition-shadow"
                       >
-                        Delete
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-xl font-bold text-gray-800">{u.name}</p>
+                            <p className="text-gray-600">{u.email} - {u.role}</p>
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => handleDeleteUser(u._id)}
+                              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
             {activeTab === "payments" && (
               <div>
-                <h2 className="text-2xl font-semibold">All Payments</h2>
-                <ul>
-                  {payments.map((p) => (
-                    <li key={p._id} className="border p-4 my-2">
-                      <p>User: {p.userId}</p>
-                      <p>Event: {p.eventId}</p>
-                      <p>Amount: {p.amount}</p>
-                      <button
-                        onClick={() => handleDeletePayment(p._id)}
-                        className="bg-red-500 text-white px-2 py-1"
+                <h2 className="text-2xl font-semibold mb-4">All Payments</h2>
+                {payments.length === 0 ? (
+                  <p className="text-gray-600">No payments found.</p>
+                ) : (
+                  <ul className="space-y-4">
+                    {payments.map((p) => (
+                      <li
+                        key={p._id}
+                        className="bg-white p-4 rounded-md shadow hover:shadow-lg transition-shadow"
                       >
-                        Delete
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-gray-800">User: {p.userId}</p>
+                            <p className="text-gray-800">Event: {p.eventId}</p>
+                            <p className="text-gray-800">Amount: ${p.amount}</p>
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => handleDeletePayment(p._id)}
+                              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Quit Confirmation Modal */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
@@ -174,3 +232,4 @@ const AdminDashboard = ({ user }) => {
 };
 
 export default AdminDashboard;
+

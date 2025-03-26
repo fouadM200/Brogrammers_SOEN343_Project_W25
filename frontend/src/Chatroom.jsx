@@ -1,6 +1,7 @@
+// src/Chatroom.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import UserSideMenuBar from "./UserSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use singleton instead of direct UserSideMenuBar
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import { SendHorizonal } from "lucide-react";
@@ -12,15 +13,17 @@ const Chatroom = ({ user, onSignOut }) => {
 
   const [input, setInput] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showConfirm, setShowConfirm] = useState(false); 
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Load messages from localStorage per event
   const loadMessages = () => {
     const stored = localStorage.getItem(`messages_${eventName}`);
-    return stored ? JSON.parse(stored) : [
-      { sender: "Alice", text: "Hey everyone!" },
-      { sender: user.name, text: "Hi Alice 👋" }
-    ];
+    return stored
+      ? JSON.parse(stored)
+      : [
+          { sender: "Alice", text: "Hey everyone!" },
+          { sender: user.name, text: "Hi Alice 👋" },
+        ];
   };
 
   const [messages, setMessages] = useState(loadMessages);
@@ -36,20 +39,26 @@ const Chatroom = ({ user, onSignOut }) => {
     setInput("");
   };
 
+  // Retrieve the sidebar using the singleton.
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
-
       {/* Sidebar */}
-      <div className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ${
-        isSidebarOpen ? "translate-x-0" : "-translate-x-64"
-      }`}>
-        <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+      <div
+        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-64"
+        }`}
+      >
+        {sidebar}
       </div>
 
       {/* Main Content */}
-      <div className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ${
-        isSidebarOpen ? "ml-64" : "ml-0"
-      }`}>
+      <div
+        className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "ml-64" : "ml-0"
+        }`}
+      >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         {/* Header Bar */}
@@ -113,7 +122,7 @@ const Chatroom = ({ user, onSignOut }) => {
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
-              navigate("/auth"); // Same as SelectChatroom
+              navigate("/auth");
             }}
             onCancel={() => setShowConfirm(false)}
           />

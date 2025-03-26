@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import UserSideMenuBar from "./UserSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Import the singleton instead of UserSideMenuBar
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 
-const EventDescription = ({ user, onSignOut }) => {
+export default function EventDescription({ user, onSignOut }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -49,7 +49,8 @@ const EventDescription = ({ user, onSignOut }) => {
   };
 
   // Convert date/time for display
-  const displayDate = new Date(currentEvent.date).toLocaleDateString() || "Unknown Date";
+  const displayDate =
+    new Date(currentEvent.date).toLocaleDateString() || "Unknown Date";
   const displayTime = currentEvent.endTime
     ? `${currentEvent.startTime} - ${currentEvent.endTime}`
     : currentEvent.startTime;
@@ -90,6 +91,10 @@ const EventDescription = ({ user, onSignOut }) => {
     }
   };
 
+  // Get the sidebar via the singleton.
+  // The onSignOut callback triggers the quit confirmation modal.
+  const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
@@ -98,7 +103,7 @@ const EventDescription = ({ user, onSignOut }) => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
+        {sidebar}
       </div>
 
       {/* Main Content */}
@@ -111,7 +116,9 @@ const EventDescription = ({ user, onSignOut }) => {
 
         {/* Event Details */}
         <div className="p-6 w-full max-w-screen-lg mx-0">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">{currentEvent.title}</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            {currentEvent.title}
+          </h1>
           <hr className="mb-8 border-gray-300 w-full" />
 
           <p className="text-lg text-gray-700 mb-2">
@@ -128,7 +135,8 @@ const EventDescription = ({ user, onSignOut }) => {
           </p>
 
           {/* Show room number if mode is in-person or hybrid */}
-          {(currentEvent.mode === "in-person" || currentEvent.mode === "hybrid") && (
+          {(currentEvent.mode === "in-person" ||
+            currentEvent.mode === "hybrid") && (
             <p className="text-lg text-gray-700 mb-2">
               <strong>Room:</strong> {currentEvent.room}
             </p>
@@ -156,7 +164,10 @@ const EventDescription = ({ user, onSignOut }) => {
                     ? `${currentEvent.registration.otherStudents} $CAD`
                     : "Not Set"}
                 </span>
-                <span className="text-red-500 font-semibold"> (30% discount)</span>
+                <span className="text-red-500 font-semibold">
+                  {" "}
+                  (30% discount)
+                </span>
               </li>
               <li>
                 <strong>Concordia Students:</strong>{" "}
@@ -174,13 +185,17 @@ const EventDescription = ({ user, onSignOut }) => {
           </p>
 
           {/* Description */}
-          <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">Event Description</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">
+            Event Description
+          </h2>
           <p className="text-xl text-gray-700 leading-relaxed">
             {currentEvent.description}
           </p>
 
           {/* Tags */}
-          <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">Tags</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">
+            Tags
+          </h2>
           <p className="text-xl text-gray-700 leading-relaxed">
             {currentEvent.tags.join(", ")}
           </p>
@@ -194,11 +209,11 @@ const EventDescription = ({ user, onSignOut }) => {
               Go Back to Search Events
             </button>
 
-            {/* Register & Pay (calls the backend, then navigates to Dashboard) */}
+            {/* Register & Pay */}
             <button
               onClick={() =>
                 navigate("/payment", {
-                  state: { event, user },
+                  state: { event: currentEvent, user },
                 })
               }
               className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition"
@@ -223,6 +238,6 @@ const EventDescription = ({ user, onSignOut }) => {
       )}
     </div>
   );
-};
+}
 
-export default EventDescription;
+

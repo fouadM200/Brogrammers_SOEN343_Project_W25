@@ -1,6 +1,7 @@
+// src/UserDashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import UserSideMenuBar from "./UserSideMenuBar";
+import SidebarSingleton from "./SidebarSingleton"; // Use the singleton instead of UserSideMenuBar
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import DisplayAccessCode from "./EventEntryDetails";
@@ -98,6 +99,10 @@ export default function UserDashboard() {
     }
   }
 
+  // Retrieve the sidebar using the singleton.
+  // The onSignOut function here triggers the logout confirmation.
+  const sidebar = SidebarSingleton.getInstance(currentUser, () => setShowConfirm(true)).getSidebar();
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
@@ -106,10 +111,7 @@ export default function UserDashboard() {
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <UserSideMenuBar
-          user={currentUser}
-          onSignOut={() => setShowConfirm(true)}
-        />
+        {sidebar}
       </div>
 
       {/* Main Content */}
