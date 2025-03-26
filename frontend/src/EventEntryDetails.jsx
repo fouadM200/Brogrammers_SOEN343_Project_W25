@@ -76,7 +76,7 @@ const DisplayAccessCode = ({ event, user, onOk }) => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
         <div className="bg-white p-8 rounded-lg shadow-lg w-[90%] max-w-md text-center animate-fade-in space-y-6">
           <h2 className="text-xl font-bold text-black">
-            Event Entry Details for {event?.title || "Unnamed Event"}
+            Event Entry Details for {event?.title || "Unnamed Event"} event
           </h2>
 
           {/* Show QR Code for in-person or hybrid events */}

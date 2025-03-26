@@ -84,6 +84,7 @@ const AdminDashboard = ({ user }) => {
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="p-6">
           <h1 className="text-4xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
+          <hr className="my-2 border-gray-300" />
 
           {/* Tab Navigation */}
           <div className="flex space-x-4 mb-6">
@@ -107,6 +108,7 @@ const AdminDashboard = ({ user }) => {
             {activeTab === "events" && (
               <div>
                 <h2 className="text-2xl font-semibold mb-4">All Events</h2>
+                <hr className="my-2 border-gray-300" />
                 {events.length === 0 ? (
                   <p className="text-gray-600">No events available.</p>
                 ) : (
@@ -128,13 +130,13 @@ const AdminDashboard = ({ user }) => {
                               onClick={() =>
                                 navigate("/admin/edit_event", { state: { event, user } })
                               }
-                              className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition-colors"
+                              className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteEvent(event._id)}
-                              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                              className="bg-gray-800 text-white px-3 py-1 rounded-md hover:bg-gray-900 transition-colors"
                             >
                               Delete
                             </button>
@@ -149,6 +151,7 @@ const AdminDashboard = ({ user }) => {
             {activeTab === "users" && (
               <div>
                 <h2 className="text-2xl font-semibold mb-4">All Users</h2>
+                <hr className="my-2 border-gray-300" />
                 {users.length === 0 ? (
                   <p className="text-gray-600">No users found.</p>
                 ) : (
@@ -166,7 +169,7 @@ const AdminDashboard = ({ user }) => {
                           <div>
                             <button
                               onClick={() => handleDeleteUser(u._id)}
-                              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                              className="bg-gray-800 text-white px-3 py-1 rounded-md hover:bg-gray-900 transition-colors"
                             >
                               Delete
                             </button>
@@ -181,6 +184,7 @@ const AdminDashboard = ({ user }) => {
             {activeTab === "payments" && (
               <div>
                 <h2 className="text-2xl font-semibold mb-4">All Payments</h2>
+                <hr className="my-2 border-gray-300" />
                 {payments.length === 0 ? (
                   <p className="text-gray-600">No payments found.</p>
                 ) : (
@@ -199,7 +203,7 @@ const AdminDashboard = ({ user }) => {
                           <div>
                             <button
                               onClick={() => handleDeletePayment(p._id)}
-                              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                              className="bg-gray-800 text-white px-3 py-1 rounded-md hover:bg-gray-900 transition-colors"
                             >
                               Delete
                             </button>

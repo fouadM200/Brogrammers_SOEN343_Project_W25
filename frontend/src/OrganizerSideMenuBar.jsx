@@ -56,20 +56,21 @@ export default function OrganizerSideMenuBar({ user, onSignOut }) {
       </nav>
 
       {/* User Navigation at the Bottom */}
-      <div className="mt-auto border-t border-gray-700 pt-4">
-      {userNavigation.map((item) => (
-        <button
-          key={item.name}
-          onClick={item.action || (() => navigate(item.href))}
-          className={`block px-4 py-2 w-full text-left rounded-md transition ${
-            location.pathname === item.href
-              ? "bg-white text-black"
-              : "text-white hover:bg-gray-700"
-          }`}
-        >
-          {item.name}
-        </button>
-      ))}
+      <div className="mt-auto border-t border-gray-700 pt-4 space-y-2">
+        {userNavigation.map((item) => (
+          <div key={item.name}>
+            <button
+              onClick={item.action || (() => navigate(item.href))}
+              className={`block px-4 py-2 w-full text-left rounded-md transition ${
+                location.pathname === item.href
+                  ? "bg-white text-black"
+                  : "text-white hover:bg-gray-700"
+              }`}
+            >
+              {item.name}
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
