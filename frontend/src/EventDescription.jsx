@@ -51,9 +51,19 @@ export default function EventDescription({ user, onSignOut }) {
   // Convert date/time for display
   const displayDate =
     new Date(currentEvent.date).toLocaleDateString() || "Unknown Date";
+
+  const formatTo12Hour = (time) => {
+    return new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   const displayTime = currentEvent.endTime
-    ? `${currentEvent.startTime} - ${currentEvent.endTime}`
-    : currentEvent.startTime;
+    ? `${formatTo12Hour(currentEvent.startTime)} - ${formatTo12Hour(currentEvent.endTime)}`
+    : formatTo12Hour(currentEvent.startTime);
+
 
   // Handler for registering user for this event
   const handleRegister = async () => {

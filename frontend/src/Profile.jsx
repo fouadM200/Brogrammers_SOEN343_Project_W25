@@ -1,4 +1,5 @@
 // src/Profile.jsx
+import HeaderMenuBar from "./HeaderMenuBar";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SidebarSingleton from "./SidebarSingleton"; // Use singleton for sidebar
@@ -74,49 +75,56 @@ export default function Profile() {
       <div className="w-64 bg-gray-800 text-white">
         {sidebar}
       </div>
-
+  
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <h1 className="text-3xl font-bold">Your Profile</h1>
-        {currentUser ? (
-          <div className="mt-4">
-            <p><strong>Name:</strong> {currentUser.name}</p>
-            <p><strong>Email:</strong> {currentUser.email}</p>
-            <p><strong>University:</strong> {currentUser.university || "Not specified"}</p>
-
-            <h2 className="text-xl font-semibold mt-4">Interests</h2>
-            <div className="mt-2">
-              {interests.length > 0 ? (
-                interests.map((interest, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <span className="bg-gray-200 px-2 py-1 rounded">{interest}</span>
-                    <button onClick={() => handleRemoveInterest(interest)} className="text-red-500">
-                      ✕
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No interests added yet.</p>
-              )}
+      <div className="flex-1 flex flex-col">
+        {/* ✅ Header Menu Bar added */}
+        <HeaderMenuBar toggleSidebar={() => {}} />
+  
+        <div className="p-6 flex-1 overflow-y-auto">
+          <h1 className="text-3xl font-bold">Your Profile</h1>
+          <hr className="my-2 border-gray-300" />
+          {currentUser ? (
+            <div className="mt-4">
+              <p><strong>Name:</strong> {currentUser.name}</p>
+              <p><strong>Email:</strong> {currentUser.email}</p>
+              <p><strong>University:</strong> {currentUser.university || "Not specified"}</p>
+  
+              <h2 className="text-xl font-semibold mt-4">Interests</h2>
+              <div className="mt-2">
+                {interests.length > 0 ? (
+                  interests.map((interest, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <span className="bg-gray-200 px-2 py-1 rounded">{interest}</span>
+                      <button onClick={() => handleRemoveInterest(interest)} className="text-red-500">
+                        ✕
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No interests added yet.</p>
+                )}
+              </div>
+  
+              <div className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  value={newInterest}
+                  onChange={(e) => setNewInterest(e.target.value)}
+                  placeholder="Add new interest"
+                  className="border p-2 rounded w-full"
+                />
+                <button onClick={handleAddInterest} className="bg-blue-500 text-white px-4 py-2 rounded">
+                  Add
+                </button>
+              </div>
             </div>
-
-            <div className="mt-4 flex gap-2">
-              <input
-                type="text"
-                value={newInterest}
-                onChange={(e) => setNewInterest(e.target.value)}
-                placeholder="Add new interest"
-                className="border p-2 rounded w-full"
-              />
-              <button onClick={handleAddInterest} className="bg-blue-500 text-white px-4 py-2 rounded">
-                Add
-              </button>
-            </div>
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
+          ) : (
+            <p>Loading...</p>
+          )}
+        </div>
       </div>
     </div>
   );
+  
 }

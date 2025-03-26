@@ -75,26 +75,25 @@ const Chatroom = ({ user, onSignOut }) => {
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-3">
-          {messages.map((msg, index) => {
-            const isCurrentUser = msg.sender === user.name;
-            return (
-              <div
-                key={index}
-                className={`max-w-md px-4 py-2 shadow-sm ${
-                  isCurrentUser
-                    ? "ml-auto bg-blue-500 text-white rounded-2xl rounded-br-none"
-                    : "mr-auto bg-gray-300 text-black rounded-2xl rounded-bl-none"
-                }`}
-              >
-                {!isCurrentUser && (
-                  <p className="font-semibold text-sm mb-1 text-gray-700">
-                    {msg.sender}
-                  </p>
-                )}
-                <p>{msg.text}</p>
-              </div>
-            );
-          })}
+        {messages.map((msg, index) => {
+          const isCurrentUser = msg.sender === user.name;
+          const isLatest = index === messages.length - 1; // 👈 only animate latest message
+          return (
+            <div
+              key={index}
+              className={`max-w-md px-4 py-2 shadow-sm transition-transform duration-300 ease-out transform ${
+                isCurrentUser
+                  ? "ml-auto bg-blue-500 text-white rounded-2xl rounded-br-none"
+                  : "mr-auto bg-gray-300 text-black rounded-2xl rounded-bl-none"
+              } ${isLatest ? "animate-message-drop" : ""}`} // 👈 apply animation class
+            >
+              {!isCurrentUser && (
+                <p className="font-semibold text-sm mb-1 text-gray-700">{msg.sender}</p>
+              )}
+              <p>{msg.text}</p>
+            </div>
+          );
+        })}
         </div>
 
         {/* Message Input */}

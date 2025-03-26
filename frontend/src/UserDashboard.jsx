@@ -5,6 +5,9 @@ import SidebarSingleton from "./SidebarSingleton"; // Use the singleton instead 
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import DisplayAccessCode from "./EventEntryDetails";
+import LeaveMeetingConfirmationOverlay from "./LeaveMeetingConfirmationOverlay";
+import LeaveMeetingSuccessOverlay from "./LeaveMeetingSuccessOverlay";
+
 
 export default function UserDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -13,6 +16,10 @@ export default function UserDashboard() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAccessCode, setShowAccessCode] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showLeaveSuccess, setShowLeaveSuccess] = useState(false);
+  const [eventToLeave, setEventToLeave] = useState(null);
+
   const navigate = useNavigate();
 
   // 1) Fetch user profile & all events from the backend
@@ -81,7 +88,7 @@ export default function UserDashboard() {
   }
 
   // 4) Leave event
-  async function handleLeave(eventId) {
+  async function handleLeaveConfirmed(eventId) {
     try {
       const token = localStorage.getItem("token");
       await fetch("http://localhost:5000/api/events/leave", {
@@ -92,12 +99,14 @@ export default function UserDashboard() {
         },
         body: JSON.stringify({ eventId }),
       });
-      // Re-fetch data so UI updates
       await fetchProfileAndEvents();
+      setShowLeaveConfirm(false);
+      setShowLeaveSuccess(true);
     } catch (error) {
       console.error("Error leaving event:", error);
     }
   }
+  
 
   // Retrieve the sidebar using the singleton.
   // The onSignOut function here triggers the logout confirmation.
@@ -151,8 +160,18 @@ export default function UserDashboard() {
                       Date: {new Date(event.date).toLocaleDateString()}
                     </p>
                     <p className="text-gray-500">
-                      Time: {event.startTime}{" "}
-                      {event.endTime && `- ${event.endTime}`}
+                      Time:{" "}
+                      {new Date(`1970-01-01T${event.startTime}`).toLocaleTimeString([], {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}{" "}
+                      {event.endTime &&
+                        `- ${new Date(`1970-01-01T${event.endTime}`).toLocaleTimeString([], {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}`}
                     </p>
                     <p className="text-gray-500">
                       Mode:{" "}
@@ -165,7 +184,7 @@ export default function UserDashboard() {
                   </div>
                   <div className="flex flex-col gap-2 ml-6">
                     <button
-                      className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
+                      className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
                       onClick={() => {
                         setSelectedEvent(event);
                         setShowAccessCode(true);
@@ -186,8 +205,11 @@ export default function UserDashboard() {
                       </button>
                     )}
                     <button
-                      className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                      onClick={() => handleLeave(event._id)}
+                      className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
+                      onClick={() => {
+                        setEventToLeave(event);
+                        setShowLeaveConfirm(true);
+                      }}
                     >
                       Leave Event
                     </button>
@@ -283,6 +305,21 @@ export default function UserDashboard() {
           onOk={() => setShowAccessCode(false)}
         />
       )}
+
+      {/* Leave Meeting Confirmation Modal */}
+      {showLeaveConfirm && eventToLeave && (
+        <LeaveMeetingConfirmationOverlay
+          eventName={eventToLeave.title}
+          onConfirm={() => handleLeaveConfirmed(eventToLeave._id)}
+          onCancel={() => setShowLeaveConfirm(false)}
+        />
+      )}
+
+      {/* Leave Success Overlay */}
+      {showLeaveSuccess && (
+        <LeaveMeetingSuccessOverlay onClose={() => setShowLeaveSuccess(false)} />
+      )}
+
     </div>
   );
 }

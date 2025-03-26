@@ -40,20 +40,21 @@ const SelectChatroom = ({ user, onSignOut }) => {
 
           {events.map((event, index) => (
             <div
-              key={index}
-              className="flex justify-between items-center bg-white shadow-md p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-            >
-              <div>
-                <span className="text-xl font-bold">{event}</span>
-                <p className="text-gray-600 text-sm">Speaker: {speakers[index]}</p>
-              </div>
-              <button
-                onClick={() => navigate("/chatroom", { state: { eventName: event } })}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-              >
-                Access Chatroom
-              </button>
+            key={index}
+            className="flex justify-between items-center bg-white shadow-md p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 opacity-0 animate-fade-in"
+            style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards", animationDuration: "0.5s" }}
+          >
+            <div>
+              <span className="text-xl font-bold">{event}</span>
+              <p className="text-gray-600 text-sm">Speaker: {speakers[index]}</p>
             </div>
+            <button
+              onClick={() => navigate("/chatroom", { state: { eventName: event } })}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            >
+              Access Chatroom
+            </button>
+          </div>
           ))}
         </div>
       </div>
