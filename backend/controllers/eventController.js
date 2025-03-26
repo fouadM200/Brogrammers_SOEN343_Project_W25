@@ -1,7 +1,8 @@
 const Event = require("../models/Event");
 const User = require("../models/User");
 const Payment = require("../models/Payment");
-
+const Notifier = require("../utils/notifier"); 
+const EmailNotifier = require("../utils/emailNotifier"); 
 // Create a new event
 exports.createEvent = async (req, res) => {
   try {
@@ -19,6 +20,19 @@ exports.createEvent = async (req, res) => {
     });
 
     await newEvent.save();
+
+    const interestedUsers = await User.find({
+      interests: { $in: newEvent.tags }
+    });
+
+    // Set up the notifier
+    const notifier = new Notifier();
+    const emailNotifier = new EmailNotifier();
+    notifier.subscribe(emailNotifier);
+
+    // Notify all observers (in this case, just EmailNotifier)
+    await notifier.notify({ newEvent, interestedUsers });
+
     return res.status(201).json({ message: "Event created successfully" });
   } catch (error) {
     console.error("Create event error:", error);
