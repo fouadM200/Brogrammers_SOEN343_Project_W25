@@ -1,0 +1,53 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Ensure no extra margin/padding is added globally */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Ensure full height without white gaps */
+}
+
+/* Style for root to minimize white space */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0; /* Set to 0 to eliminate extra white space */
+  text-align: center;
+}
+
+
+/* Navigation */
+nav {
+  margin: 0; /* Remove margin from the nav if any */
+  padding: 0; /* Remove padding from the nav if any */
+}
+
+/* Navigation bar container */
+.flex {
+  margin-top: 0; /* Remove top margin */
+  padding-top: 0.5rem; /* Set padding to a minimal value */
+}
+
+.card {
+  padding: 2em;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styling */
+button {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
