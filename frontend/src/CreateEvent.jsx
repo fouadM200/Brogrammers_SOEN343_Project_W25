@@ -24,6 +24,7 @@ const CreateEvent = ({ user }) => {
     mode: "online",
     room: "",
     location: "",
+    zoomLink: "",
     registration: {
       regular: "",
       otherStudents: "",
@@ -228,6 +229,20 @@ const CreateEvent = ({ user }) => {
                 />
               </div>
             )}
+            {/* Zoom Link (for online/hybrid) */}
+          {(eventDetails.mode.toLowerCase() === "online" || eventDetails.mode.toLowerCase() === "hybrid") && (
+            <div className="mb-4">
+              <label className="block mb-1 font-medium">Zoom Link:</label>
+              <input
+                type="text"
+                name="zoomLink"
+                value={eventDetails.zoomLink}
+                onChange={handleChange}
+                className="p-3 border rounded w-full"
+                placeholder="Enter Zoom meeting URL"
+              />
+            </div>
+          )}
 
             {/* Registration Pricing */}
             <div className="mb-4">

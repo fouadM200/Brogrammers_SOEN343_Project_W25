@@ -1,6 +1,6 @@
 import React from "react";
 
-const AccessEventSuccess = ({ onOk }) => {
+const AccessEventSuccess = ({ event, onOk }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96 text-center animate-fade-in">
@@ -21,7 +21,6 @@ const AccessEventSuccess = ({ onOk }) => {
               fill="none"
               className="circle-animation"
             />
-
             {/* Green Check */}
             <path
               d="M40 65 L55 80 L85 45"
@@ -36,18 +35,21 @@ const AccessEventSuccess = ({ onOk }) => {
         </div>
 
         <h2 className="text-xl font-semibold text-black mb-2">
-          Success! Click on the following link to access the event.
+          Success! Click below to access the event.
         </h2>
-
-        <a
-          href="https://zoom.us"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline font-medium block mb-6"
-        >
-          Join Zoom Meeting
-        </a>
-
+        {event && event.zoomLink && event.zoomLink.trim() !== "" ? (
+          <a
+            href={event.zoomLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline font-medium block mb-6"
+          >
+            Join Zoom Meeting
+          </a>
+        ) : (
+          <p className="text-red-500 mb-6">Zoom link is not provided for this event.</p>
+        )}
+        
         <button
           onClick={onOk}
           className="w-full py-3 bg-gray-800 text-white rounded hover:bg-gray-900"

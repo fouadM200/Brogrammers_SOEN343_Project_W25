@@ -125,7 +125,7 @@ export default function OnlineEventAccess() {
 
       {/* Success Overlay */}
       {showSuccess && (
-        <AccessEventSuccess onOk={() => setShowSuccess(false)} />
+        <AccessEventSuccess event={event} onOk={() => setShowSuccess(false)} />
       )}
 
       {/* Failure Overlay */}

@@ -15,6 +15,7 @@ const eventSchema = new mongoose.Schema({
   mode: { type: String, default: "online" },
   room: { type: String, default: "" },
   location: { type: String, required: true },
+  zoomLink: { type: String, default: "" },
   registration: { type: registrationSchema, default: {} },
   description: { type: String, default: "" },
   tags: {type: [String], default: ["default test"] },

@@ -28,6 +28,7 @@ const EditEvent = () => {
     mode: event?.mode || "online",
     room: event?.room || "",
     location: event?.location || "",
+    zoomLink: event?.zoomLink || "", 
     registration: event?.registration || {
       regular: "",
       otherStudents: "",
@@ -237,6 +238,20 @@ const EditEvent = () => {
                   value={eventDetails.room}
                   onChange={handleChange}
                   className="w-full p-3 border rounded"
+                />
+              </div>
+            )}
+            
+            {(eventDetails.mode.toLowerCase() === "online" || eventDetails.mode.toLowerCase() === "hybrid") && (
+              <div className="mb-4">
+                <label className="block mb-1 font-medium">Zoom Link:</label>
+                <input
+                  type="text"
+                  name="zoomLink"
+                  value={eventDetails.zoomLink}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                  placeholder="Enter Zoom meeting URL"
                 />
               </div>
             )}

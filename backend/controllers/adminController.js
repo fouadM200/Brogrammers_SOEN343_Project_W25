@@ -28,6 +28,7 @@ exports.updateEvent = async (req, res) => {
     event.mode = req.body.mode || event.mode;
     event.room = req.body.room || event.room;
     event.location = req.body.location || event.location;
+    event.zoomLink = req.body.zoomLink || event.zoomLink; 
     event.registration = req.body.registration || event.registration;
     event.description = req.body.description || event.description;
     event.tags = req.body.tags || event.tags;
