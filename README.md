@@ -49,7 +49,9 @@ cd backend
 ```bash
 npm install
 ```
-
+```bash
+npm install nodemailer
+```
 ## Run it!
 
 ```bash
