@@ -33,6 +33,10 @@ npm install
 npm install lucide-react swiper
 ```
 
+```bash
+npm install recharts
+```
+
 ## Run it!
 
 ```bash
