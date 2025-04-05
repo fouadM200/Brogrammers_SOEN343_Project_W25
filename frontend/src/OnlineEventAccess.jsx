@@ -1,4 +1,3 @@
-// src/OnlineEventAccess.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SidebarSingleton from "./SidebarSingleton"; // Use singleton for sidebar
@@ -18,6 +17,11 @@ export default function OnlineEventAccess() {
   const navigate = useNavigate();
   // Expect event and user objects passed via location state
   const { event, user } = location.state || {};
+
+  // Set the browser tab title dynamically based on the event title
+  useEffect(() => {
+    document.title = `SEES | ${event?.title + " access" || "Online Event Access"}`;
+  }, [event?.title]);
 
   // Fetch the correct code from the backend (using your payments API)
   useEffect(() => {
@@ -64,7 +68,7 @@ export default function OnlineEventAccess() {
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >

@@ -105,4 +105,53 @@
   .animate-message-drop {
     animation: message-drop 0.3s ease-out forwards;
   }
+
+  /* styles.css */
+  .credit-card-container {
+    perspective: 1000px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .credit-card {
+    width: 400px; /* Increased width for a larger image */
+    height: 240px; /* Increased height for a larger image */
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    cursor: pointer;
+  }
+  
+  .credit-card:hover {
+    transform: rotateY(180deg);
+  }
+  
+  .card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px; /* Slightly rounded corners */
+    overflow: hidden;
+  }
+  
+  .card-front,
+  .card-back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .card-front img,
+  .card-back img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .card-back {
+    transform: rotateY(180deg);
+  }
   

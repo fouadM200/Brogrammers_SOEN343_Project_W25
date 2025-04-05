@@ -1,6 +1,5 @@
-// src/AnalyticsGraph.jsx
 import React, { useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import SidebarSingleton from "./SidebarSingleton";
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
@@ -20,13 +19,14 @@ import {
 export default function AnalyticsGraph({ user }) {
   const { eventId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const event = location.state?.event; // Optional: use passed event data
 
   // Sidebar toggle state and sign out confirmation
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Get the sidebar instance
+  // Get the sidebar instance. Active styling is handled in the sidebar component.
   const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
 
   // Mock data for charts
@@ -41,7 +41,7 @@ export default function AnalyticsGraph({ user }) {
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
@@ -71,10 +71,7 @@ export default function AnalyticsGraph({ user }) {
             </h2>
             <div className="w-full h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={mockData}
-                  margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-                >
+                <LineChart data={mockData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="label" />
                   <YAxis />
@@ -106,6 +103,13 @@ export default function AnalyticsGraph({ user }) {
               </ResponsiveContainer>
             </div>
           </section>
+          <br />
+          <button
+          onClick={() => navigate("/organizer/analytics")}
+          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 mb-4"
+          >
+            Go back to Analytics & Reporting
+          </button>
         </main>
       </div>
 
@@ -115,7 +119,6 @@ export default function AnalyticsGraph({ user }) {
           <QuitConfirmation
             onConfirm={() => {
               setShowConfirm(false);
-              // Navigate to auth page after sign out
               window.location.href = "/auth";
             }}
             onCancel={() => setShowConfirm(false)}
@@ -125,8 +128,6 @@ export default function AnalyticsGraph({ user }) {
     </div>
   );
 }
-
-
 
 
 /* npm install recharts*/

@@ -1,13 +1,11 @@
-// src/UserDashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SidebarSingleton from "./SidebarSingleton"; // Use the singleton instead of UserSideMenuBar
+import SidebarSingleton from "./SidebarSingleton";
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import DisplayAccessCode from "./EventEntryDetails";
 import LeaveMeetingConfirmationOverlay from "./LeaveMeetingConfirmationOverlay";
 import LeaveMeetingSuccessOverlay from "./LeaveMeetingSuccessOverlay";
-
 
 export default function UserDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -21,6 +19,11 @@ export default function UserDashboard() {
   const [eventToLeave, setEventToLeave] = useState(null);
 
   const navigate = useNavigate();
+
+  // Set the browser tab title when the component mounts
+  useEffect(() => {
+    document.title = "SEES | User dashboard"; // Customize your title here
+  }, []);
 
   // 1) Fetch user profile & all events from the backend
   useEffect(() => {
@@ -55,13 +58,11 @@ export default function UserDashboard() {
   );
 
   const recommendedEvents = allEvents.filter((evt) => {
-    // Exclude events the user is already registered for
     const isRegistered = currentUser?.registeredEvents?.some(
       (reg) => reg._id.toString() === evt._id.toString()
     );
     if (isRegistered) return false;
 
-    // Check if the event tags intersect with user interests
     const userInterests = (currentUser?.interests || []).map((i) =>
       i.trim().toLowerCase()
     );
@@ -80,7 +81,6 @@ export default function UserDashboard() {
         },
         body: JSON.stringify({ eventId }),
       });
-      // Re-fetch data so UI updates
       await fetchProfileAndEvents();
     } catch (error) {
       console.error("Error registering for event:", error);
@@ -107,16 +107,13 @@ export default function UserDashboard() {
     }
   }
   
-
-  // Retrieve the sidebar using the singleton.
-  // The onSignOut function here triggers the logout confirmation.
   const sidebar = SidebarSingleton.getInstance(currentUser, () => setShowConfirm(true)).getSidebar();
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
@@ -319,7 +316,6 @@ export default function UserDashboard() {
       {showLeaveSuccess && (
         <LeaveMeetingSuccessOverlay onClose={() => setShowLeaveSuccess(false)} />
       )}
-
     </div>
   );
 }

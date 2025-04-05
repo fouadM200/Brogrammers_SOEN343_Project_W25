@@ -14,6 +14,11 @@ export default function Profile() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
+    // Set the browser tab title when the component mounts
+    useEffect(() => {
+      document.title = "SEES | Your profile"; // Customize your title here
+    }, []);
+
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("currentUser"));
     if (user) {
@@ -100,9 +105,9 @@ export default function Profile() {
           {currentUser ? (
             <div className="max-w-5xl mx-auto space-y-8">
               {/* Revised Profile Header matching sidebar blue */}
-              <div className="bg-blue-600 rounded-xl shadow p-6 flex flex-col md:flex-row items-center transition-transform transform hover:scale-105">
+              <div className="bg-blue-500 rounded-xl shadow p-6 flex flex-col md:flex-row items-center transition-transform transform">
                 {/* Avatar */}
-                <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-blue-600 font-bold text-3xl mr-4 shadow">
+                <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-blue-500 font-bold text-3xl mr-4 shadow">
                   {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : "U"}
                 </div>
                 {/* Name and University */}
@@ -110,7 +115,7 @@ export default function Profile() {
                   <h1 className="text-3xl font-bold tracking-normal">{currentUser.name}</h1>
                   <div className="w-full h-1 mt-1 mb-2 bg-gradient-to-r from-blue-300 to-blue-800 rounded"></div>
                   <p className="text-base italic">
-                    {currentUser.university || "University not specified"}
+                    {currentUser.university || "Regular attendee"}
                   </p>
                 </div>
               </div>
@@ -143,7 +148,7 @@ export default function Profile() {
                         onClick={() => toggleDomain(domain)}
                         className={`px-4 py-2 rounded-full border transition-all duration-300 ${
                           interests.includes(domain)
-                            ? "bg-indigo-600 text-white border-indigo-600"
+                            ? "bg-blue-500 text-white border-blue-600"
                             : "bg-white text-gray-800 border-gray-300 hover:bg-gray-100"
                         }`}
                       >
@@ -163,7 +168,7 @@ export default function Profile() {
                       />
                       <button
                         onClick={handleAddInterest}
-                        className="bg-indigo-600 text-white px-6 py-3 rounded hover:bg-indigo-700 transition-colors"
+                        className="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 transition-colors"
                       >
                         Add Interest
                       </button>

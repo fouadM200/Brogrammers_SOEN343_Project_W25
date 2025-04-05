@@ -16,6 +16,11 @@ const Auth = ({ onAuth }) => {
     university: "",
   });
 
+      // Set the browser tab title when the component mounts
+      useEffect(() => {
+        document.title = "SEES | Sign up"; // Customize your title here
+      }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get("signup") === "true") {
@@ -97,7 +102,7 @@ const Auth = ({ onAuth }) => {
       <div className="w-1/2 flex items-center justify-center bg-blue-300">
         <div className="w-full max-w-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-            {isSignUp ? "Create an account" : "Sign in to your account"}
+            {isSignUp ? "Create a new account" : "Sign in to your account"}
           </h2>
           <form onSubmit={handleSubmit}>
             {isSignUp && (

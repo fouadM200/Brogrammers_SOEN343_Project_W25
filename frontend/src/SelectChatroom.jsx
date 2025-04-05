@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SidebarSingleton from "./SidebarSingleton"; // New import for singleton
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -8,7 +8,7 @@ const SelectChatroom = ({ user, onSignOut }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
-
+  
   // Retrieve the sidebar component via the singleton.
   // The onSignOut behavior is set to trigger the logout confirmation.
   const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
@@ -16,11 +16,17 @@ const SelectChatroom = ({ user, onSignOut }) => {
   const events = ["Event 1", "Event 2", "Event 3"];
   const speakers = ["Alice Smith", "Bob Johnson", "Charlie Lee"];
 
+    // Set the browser tab title
+    useEffect(() => {
+      document.title = "SEES | Select Chatroom";
+    }, []);
+
+
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
