@@ -46,7 +46,7 @@ export default function AnalyticsReporting({ user }) {
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >

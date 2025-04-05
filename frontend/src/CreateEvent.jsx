@@ -1,7 +1,6 @@
-// src/CreateEvent.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SidebarSingleton from "./SidebarSingleton"; // Import the singleton instead of OrganizerSideMenuBar
+import SidebarSingleton from "./SidebarSingleton";
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import CancelCreateNewEvent from "./CancelCreateNewEvent";
@@ -33,6 +32,11 @@ const CreateEvent = ({ user }) => {
     description: "",
     tags: [],
   });
+
+  // Set the browser tab title
+  useEffect(() => {
+    document.title = "SEES | Create New Event";
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -82,7 +86,7 @@ const CreateEvent = ({ user }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(eventDetails),
       });
@@ -101,7 +105,6 @@ const CreateEvent = ({ user }) => {
   };
 
   // Get the sidebar via the singleton.
-  // The onSignOut callback here triggers the quit confirmation modal.
   const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
 
   return (
@@ -117,14 +120,17 @@ const CreateEvent = ({ user }) => {
 
       {/* Main Content */}
       <div
-        className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <div className="p-6 min-h-screen bg-gray-100">
+
+        {/* Use a <main> element with bg-gray-100 and flex-1 to cover full height */}
+        <main className="p-6 bg-gray-100 flex-1">
           <h1 className="text-3xl font-bold text-left mb-2">Create a New Event</h1>
           <hr className="border-gray-300 mb-6" />
+
           <div className="w-full max-w-5xl">
             {/* Title & Speaker */}
             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -229,20 +235,22 @@ const CreateEvent = ({ user }) => {
                 />
               </div>
             )}
+
             {/* Zoom Link (for online/hybrid) */}
-          {(eventDetails.mode.toLowerCase() === "online" || eventDetails.mode.toLowerCase() === "hybrid") && (
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Zoom Link:</label>
-              <input
-                type="text"
-                name="zoomLink"
-                value={eventDetails.zoomLink}
-                onChange={handleChange}
-                className="p-3 border rounded w-full"
-                placeholder="Enter Zoom meeting URL"
-              />
-            </div>
-          )}
+            {(eventDetails.mode.toLowerCase() === "online" ||
+              eventDetails.mode.toLowerCase() === "hybrid") && (
+              <div className="mb-4">
+                <label className="block mb-1 font-medium">Zoom Link:</label>
+                <input
+                  type="text"
+                  name="zoomLink"
+                  value={eventDetails.zoomLink}
+                  onChange={handleChange}
+                  className="p-3 border rounded w-full"
+                  placeholder="Enter Zoom meeting URL"
+                />
+              </div>
+            )}
 
             {/* Registration Pricing */}
             <div className="mb-4">
@@ -339,7 +347,7 @@ const CreateEvent = ({ user }) => {
               </button>
             </div>
           </div>
-        </div>
+        </main>
       </div>
 
       {/* Overlays for confirmations and success */}

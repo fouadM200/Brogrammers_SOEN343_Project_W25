@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SidebarSingleton from "./SidebarSingleton"; // Import the singleton instead of UserSideMenuBar
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -48,6 +48,11 @@ export default function EventDescription({ user, onSignOut }) {
     tags: event?.tags || fallbackEvent.tags,
   };
 
+  // Set the browser tab title using the event title
+  useEffect(() => {
+    document.title = `SEES | ${currentEvent.title}`;
+  }, [currentEvent.title]);
+
   // Convert date/time for display
   const displayDate =
     new Date(currentEvent.date).toLocaleDateString() || "Unknown Date";
@@ -63,7 +68,6 @@ export default function EventDescription({ user, onSignOut }) {
   const displayTime = currentEvent.endTime
     ? `${formatTo12Hour(currentEvent.startTime)} - ${formatTo12Hour(currentEvent.endTime)}`
     : formatTo12Hour(currentEvent.startTime);
-
 
   // Handler for registering user for this event
   const handleRegister = async () => {
@@ -109,7 +113,7 @@ export default function EventDescription({ user, onSignOut }) {
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
@@ -249,5 +253,3 @@ export default function EventDescription({ user, onSignOut }) {
     </div>
   );
 }
-
-

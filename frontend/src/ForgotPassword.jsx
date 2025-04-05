@@ -1,5 +1,4 @@
-// src/ForgotPassword.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "./assets/Version3.png";
 
@@ -9,6 +8,11 @@ const ForgotPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+
+  // Set the browser tab title
+  useEffect(() => {
+    document.title = "SEES | Forgot Password";
+  }, []);
 
   const handleVerifyEmail = (e) => {
     e.preventDefault();

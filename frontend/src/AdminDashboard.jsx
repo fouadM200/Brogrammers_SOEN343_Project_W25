@@ -15,6 +15,10 @@ const AdminDashboard = ({ user }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
+    useEffect(() => {
+      document.title = "SEES | Admin dashboard"; // Customize your title here
+    }, []);
+
   // Fetch data based on active tab
   useEffect(() => {
     if (!token) return;

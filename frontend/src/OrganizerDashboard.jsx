@@ -26,6 +26,11 @@ export default function OrganizerDashboard({ user }) {
 
   const navigate = useNavigate();
 
+    // Set the browser tab title when the component mounts
+    useEffect(() => {
+      document.title = "SEES | Organizer dashbaord"; // Customize your title here
+    }, []);
+
   // 1) Fetch "my events" from the backend on mount
   useEffect(() => {
     const fetchMyEvents = async () => {
@@ -108,7 +113,7 @@ export default function OrganizerDashboard({ user }) {
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
@@ -159,14 +164,18 @@ export default function OrganizerDashboard({ user }) {
                         : ""}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
                     <button
-                      onClick={() =>
-                        navigate("/edit_event", { state: { event, user } })
-                      }
+                      onClick={() => navigate("/edit_event", { state: { event, user } })}
                       className="px-4 py-2 bg-blue-500 text-white rounded-md"
                     >
                       Edit
+                    </button>
+                    <button
+                      onClick={() => viewRegistrations(event)}
+                      className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition"
+                    >
+                      View Registrations
                     </button>
                     <button
                       onClick={() => {
@@ -176,12 +185,6 @@ export default function OrganizerDashboard({ user }) {
                       className="px-4 py-2 bg-gray-800 text-white rounded-md"
                     >
                       Delete
-                    </button>
-                    <button
-                      onClick={() => viewRegistrations(event)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                    >
-                      View Registrations
                     </button>
                   </div>
                 </div>
