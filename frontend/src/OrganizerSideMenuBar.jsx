@@ -15,22 +15,22 @@ export default function OrganizerSideMenuBar({ user, onSignOut }) {
       ? nameParts[0][0].toUpperCase() + nameParts[1][0].toUpperCase()
       : nameParts[0][0].toUpperCase();
 
-  // Main navigation links
+  // Main navigation links with updated routing paths
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
     { name: "Create new event", href: "/create_event" },
-    { name: "Analytics and Reporting", href: "/analytics" },
+    { name: "Analytics and Reporting", href: "/organizer/analytics" },
   ];
 
   // User navigation links
   const userNavigation = [
-    { name: "Your Profile", href: "/Profile" },
+    { name: "Your Profile", href: "/profile" },
     { name: "Sign out", action: onSignOut },
   ];
 
   return (
     <div className="w-64 bg-gray-800 text-white flex flex-col p-4 min-h-screen">
-    {/* Profile Section */}
+      {/* Profile Section */}
       <div className="flex flex-col items-center mb-6">
         <div className="w-16 h-16 bg-blue-500 text-white flex items-center justify-center rounded-full text-xl font-bold">
           {initials}

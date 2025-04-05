@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import SelectChatroom from "./SelectChatroom"; 
 import UserDashboard from './UserDashboard';
 import OrganizerDashboard from "./OrganizerDashboard";
+import AnalyticsReporting from "./AnalyticsReporting";
+import AnalyticsGraph from "./AnalyticsGraph";
 import AdminDashboard from "./AdminDashboard";
 import AdminEditEvent from "./AdminEditEvent";
 import Auth from "./Auth";
@@ -61,13 +63,36 @@ const App = () => {
               ) : currentUser.role === "attendee" ? (
                 <UserDashboard />
               ) : (
-                // if admin, force admin dashboard route below
                 <Navigate to="/admin" />
               )
             ) : (
               <Navigate to="/auth" />
             )
           }
+        />
+
+        {/* Analytics Reporting Page */}
+        <Route 
+          path="/organizer/analytics" 
+          element={
+            currentUser && currentUser.role === "organizer" ? (
+              <AnalyticsReporting user={currentUser} />
+            ) : (
+              <Navigate to="/auth" />
+            )
+          } 
+        />
+
+        {/* Analytics Graph Page */}
+        <Route 
+          path="/organizer/analytics/graph/:eventId" 
+          element={
+            currentUser && currentUser.role === "organizer" ? (
+              <AnalyticsGraph user={currentUser} />
+            ) : (
+              <Navigate to="/auth" />
+            )
+          } 
         />
 
         <Route path="/admin" element={
