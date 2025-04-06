@@ -83,18 +83,44 @@ const Chatroom = ({ user, onSignOut }) => {
         }`}
       >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-300 bg-gray-100">
-          <div
-            onClick={() => navigate("/select_chatroom")}
-            className="cursor-pointer text-sm text-black hover:underline"
-          >
-            &lt; Go back to Chatrooms
+        {/* Header with Back link and Event Title */}
+        <div className="flex flex-col border-b border-gray-300 bg-gray-100">
+          <div className="flex items-center justify-between px-6 py-4">
+            <div
+              onClick={() => navigate("/select_chatroom")}
+              className="cursor-pointer text-sm text-black hover:underline"
+            >
+              &lt; Go back to Chatrooms
+            </div>
+            <h2 className="text-xl font-bold text-center flex-1">
+              {event ? event.title : "Chatroom"}
+            </h2>
+            <div className="w-40"></div>
           </div>
-          <h2 className="text-xl font-bold text-center flex-1">
-            {event ? event.title : "Chatroom"}
-          </h2>
-          <div className="w-40"></div>
+          {/* New Event Info Block */}
+          {event && (
+            <div className="px-6 py-2 bg-gray-200">
+              <p className="text-sm text-gray-700">
+                <strong>Speaker:</strong> {event.speaker}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Time:</strong> {event.startTime} {event.endTime && `- ${event.endTime}`}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Mode:</strong> {event.mode}
+              </p>
+              {(event.mode.toLowerCase() === "in-person" || event.mode.toLowerCase() === "hybrid") && event.room && (
+                <p className="text-sm text-gray-700">
+                  <strong>Room:</strong> {event.room}
+                </p>
+              )}
+            </div>
+          )}
         </div>
+        {/* Messages Container */}
         <div className="flex-1 overflow-y-auto p-6 space-y-3">
           {loading ? (
             <p>Loading messages...</p>
@@ -121,6 +147,7 @@ const Chatroom = ({ user, onSignOut }) => {
             })
           )}
         </div>
+        {/* Message Input */}
         <div className="p-4 border-t bg-white flex items-center gap-2">
           <input
             type="text"
