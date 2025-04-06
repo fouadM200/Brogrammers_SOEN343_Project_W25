@@ -45,19 +45,16 @@ exports.reactToMessage = async (req, res) => {
         return res.status(404).json({ error: "Message not found" });
       }
   
-      // Ensure reactions is an object
-      if (!message.reactions) {
-        message.reactions = {};
-      }
+      // Retrieve the current list of users for this emoji using the Map getter
+      let reactedUsers = message.reactions.get(emoji) || [];
   
-      // Get the array of users for this emoji, or initialize it
-      let reactedUsers = message.reactions[emoji] || [];
-  
+      // Add the reacting user if not already present
       if (!reactedUsers.includes(reactingUser)) {
         reactedUsers.push(reactingUser);
       }
   
-      message.reactions[emoji] = reactedUsers;
+      // Update the Map using the setter
+      message.reactions.set(emoji, reactedUsers);
       await message.save();
   
       res.json(message);
@@ -66,3 +63,4 @@ exports.reactToMessage = async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     }
   };
+  
