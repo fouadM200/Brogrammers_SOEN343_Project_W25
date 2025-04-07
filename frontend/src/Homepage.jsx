@@ -168,22 +168,63 @@ const Homepage = () => {
     </section>
 
 
-      {/* Features Section */}
-      <section id="features" className="p-16 bg-gray-900 text-white text-center">
-        <h2 className="text-3xl font-bold">Our Unique & Awesome Core Features</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-0 mt-8">
-          {[
-            "Crafted for Startups",
-            "High-quality Design",
-            "All Essential Sections",
-            "Speed Optimized",
-            "Fully Customizable",
-            "Regular Updates",
-          ].map((title, i) => (
-            <Feature key={i} image={null} title={title} description="Lorem ipsum dolor sit amet, consectetur adipiscing elit." />
-          ))}
-        </div>
-      </section>
+    {/* Features Section */}
+    <section id="features" className="p-16 bg-gray-900 text-white text-center">
+      <h2 className="text-3xl font-bold">Our Unique & Awesome Core Features</h2>
+
+      {/* Top Row: 3 items */}
+      <div className="grid grid-cols-3 gap-4 mt-8 max-w-6xl mx-auto">
+        {[
+          {
+            image: "event.png",
+            title: "Special events",
+            description: "Discover a wide range of special events in different modes: online, in-person or hybrid.",
+          },
+          {
+            image: "promotion.png",
+            title: "Event Promotions",
+            description: "Stay informed with the latest event updates and exclusive promotions tailored to your interests.",
+          },
+          {
+            image: "discount.png",
+            title: "Discounts & Free Access",
+            description: "University students receive exclusive discounts and Concordia University students receive free access to attend events.",
+          },
+        ].map((feature, i) => (
+          <Feature
+            key={i}
+            image={feature.image}
+            title={feature.title}
+            description={feature.description}
+          />
+        ))}
+      </div>
+
+      {/* Bottom Row: 2 items centered */}
+      <div className="flex justify-center gap-4 mt-8 max-w-6xl mx-auto">
+        {[
+          {
+            image: "chatroom.png",
+            title: "Chatroom",
+            description: "Connect with other attendees and speakers through our chatroom feature, fostering networking and collaboration.",
+          },
+          {
+            image: "AI.png",
+            title: "AI-Powered",
+            description: "Leverage the power of AI to enhance your chatroom experience, providing summaries and insights from discussions.",
+          },
+        ].map((feature, i) => (
+          <Feature
+            key={i}
+            image={feature.image}
+            title={feature.title}
+            description={feature.description}
+          />
+        ))}
+      </div>
+    </section>
+
+
 
       {/* About Us Section */}
       <section id="about" className="relative p-16 pb-32 bg-gray-800 text-white text-center">
