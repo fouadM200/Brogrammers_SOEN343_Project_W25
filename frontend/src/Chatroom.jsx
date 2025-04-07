@@ -111,6 +111,19 @@ const Chatroom = ({ user, onSignOut }) => {
     setActiveReactionIndex(null);
   };
 
+  // Helper function to convert "HH:MM" to 12-hour format with am/pm
+  const formatTo12Hour = (timeString) => {
+    if (!timeString) return "";
+    const [hours, minutes] = timeString.split(":");
+    const date = new Date();
+    date.setHours(hours, minutes);
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   const toggleReactionPicker = (msgIndex) => {
     setActiveReactionIndex((prevIndex) =>
       prevIndex === msgIndex ? null : msgIndex
@@ -183,9 +196,10 @@ const Chatroom = ({ user, onSignOut }) => {
         <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
       </p>
       <p className="text-sm text-gray-700">
-        <strong>Time:</strong> {event.startTime}{" "}
-        {event.endTime && `- ${event.endTime}`}
-      </p>
+      <strong>Time:</strong>{" "}
+      {formatTo12Hour(event.startTime)}{" "}
+      {event.endTime && `- ${formatTo12Hour(event.endTime)}`}
+    </p>
       <p className="text-sm text-gray-700">
         <strong>Mode:</strong> {event.mode}
       </p>
@@ -203,7 +217,7 @@ const Chatroom = ({ user, onSignOut }) => {
 <div className="px-6 py-4">
   <button
     onClick={fetchSummary}
-    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
   >
     {summaryLoading ? "Summarizing..." : "Summarize Chat"}
   </button>
@@ -325,19 +339,21 @@ const Chatroom = ({ user, onSignOut }) => {
 
       {/* Summary Modal */}
       {showSummary && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-            <h2 className="text-2xl font-bold mb-4">Chat Summary</h2>
-            <p className="text-gray-700 mb-4 whitespace-pre-wrap">{summary}</p>
-            <button
-              onClick={() => setShowSummary(false)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            >
-              Close
-            </button>
-          </div>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full text-center">
+          <h2 className="text-2xl font-bold mb-4">Chat Summary</h2>
+          <p className="text-gray-700 mb-4 whitespace-pre-wrap">{summary}</p>
+          <button
+            onClick={() => setShowSummary(false)}
+            className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
+          >
+            Close
+          </button>
         </div>
-      )}
+      </div>
+    )}
+
+      
 
       {/* Logout Confirmation Modal */}
       {showConfirm && (
