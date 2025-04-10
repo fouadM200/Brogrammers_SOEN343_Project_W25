@@ -45,7 +45,7 @@ export default function AnalyticsGraph({ user }) {
         setRegistrations(data);
 
         const trends = data.reduce((acc, reg) => {
-          const date = new Date(reg.paymentDate).toLocaleDateString("en-CA"); // "YYYY-MM-DD"
+          const date = new Date(reg.paymentDate).toLocaleDateString("en-CA");
           const existing = acc.find(t => t.date === date) || { date, registrationCount: 0, totalRevenue: 0 };
           existing.registrationCount += 1;
           existing.totalRevenue += reg.amount === "Free" ? 0 : parseFloat(reg.amount || 0);
@@ -113,7 +113,7 @@ export default function AnalyticsGraph({ user }) {
     doc.text(`Average Rating: ${feedbackData?.avgRating?.toFixed(2) || "0"} ⭐️`, 14, y + 10);
     doc.text(`Total Feedback Entries: ${feedbackData?.feedbackCount || "0"}`, 14, y + 20);
     doc.text("Session Engagement:", 14, y + 35);
-    doc.text(`Messages Sent: ${engagementData?.messageCount || "0"}`, 14, y + 45);
+    doc.text(`Total Messages Sent: ${engagementData?.messageCount || "0"}`, 14, y + 45);
 
     const addChartToPDF = async (ref, yPos) => {
       if (!ref.current) return;
@@ -201,11 +201,9 @@ export default function AnalyticsGraph({ user }) {
                   <LineChart
                     data={registrations.reduce((acc, reg) => {
                       const date = new Date(reg.paymentDate).toLocaleDateString("en-CA");
-                      console.log("Date:", date);
                       const existing = acc.find(t => t.date === date) || { date, registrationCount: 0, totalRevenue: 0 };
                       existing.registrationCount += 1;
                       existing.totalRevenue += reg.amount === "Free" ? 0 : parseFloat(reg.amount || 0);
-                      console.log("Count:", existing.registrationCount, "Revenue:", existing.totalRevenue);
                       if (!acc.find(t => t.date === date)) acc.push(existing);
                       return acc;
                     }, []).sort((a, b) => new Date(a.date) - new Date(b.date))}
@@ -250,27 +248,27 @@ export default function AnalyticsGraph({ user }) {
           </section>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <section className="bg-white p-4 shadow-md rounded-lg">
-  <h2 className="text-2xl font-semibold mb-2">Feedback Summary</h2>
-  {feedbackData.avgRating ? (
-    <p className="text-gray-700">
-      Average Rating: {feedbackData.avgRating.toFixed(1)} / 5{" "}
-      {"★".repeat(Math.round(feedbackData.avgRating))} <br />
-      Total Feedback Entries: {feedbackData.feedbackCount || 0}
-    </p>
-  ) : (
-    <p>No feedback data available.</p>
-  )}
-</section>
+            <section className="bg-white p-4 shadow-md rounded-lg">
+              <h2 className="text-2xl font-semibold mb-2">Feedback Summary</h2>
+              {feedbackData.avgRating ? (
+                <p className="text-gray-700">
+                  Average Rating: {feedbackData.avgRating.toFixed(2)} ⭐️ <br />
+                  Total Feedback Entries: {feedbackData.feedbackCount || 0}
+                </p>
+              ) : (
+                <p>No feedback data available.</p>
+              )}
+            </section>
 
+            {/* Updated Session Engagement Section */}
             <section className="bg-white p-4 shadow-md rounded-lg">
               <h2 className="text-2xl font-semibold mb-2">Session Engagement</h2>
               {engagementData.messageCount ? (
                 <p className="text-gray-700">
-                  Messages Sent: {engagementData.messageCount}
+                  Total Messages Sent: {engagementData.messageCount}
                 </p>
               ) : (
-                <p>No engagement data available.</p>
+                <p className="text-gray-500">No messages sent yet.</p>
               )}
             </section>
           </div>
