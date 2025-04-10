@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import SidebarSingleton from "./SidebarSingleton"; // Import the singleton instead of UserSideMenuBar
+import SidebarSingleton from "./SidebarSingleton";
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 
@@ -9,11 +9,11 @@ export default function EventDescription({ user, onSignOut }) {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [rating, setRating] = useState(0); // State for star rating
+  const [feedbackMessage, setFeedbackMessage] = useState(""); // Feedback submission message
+  const [isRegistered, setIsRegistered] = useState(false); // Track registration status
 
-  // We receive an 'event' object via React Router location state
   const { event } = location.state || {};
-
-  // Fallback event if none is provided
   const fallbackEvent = {
     _id: null,
     title: "Event Title",
@@ -32,7 +32,6 @@ export default function EventDescription({ user, onSignOut }) {
     tags: ["no tags added"],
   };
 
-  // Merge event data with fallback
   const currentEvent = {
     ...fallbackEvent,
     ...event,
@@ -64,7 +63,6 @@ export default function EventDescription({ user, onSignOut }) {
       hour12: true,
     });
   };
-
   const displayTime = currentEvent.endTime
     ? `${formatTo12Hour(currentEvent.startTime)} - ${formatTo12Hour(currentEvent.endTime)}`
     : formatTo12Hour(currentEvent.startTime);
@@ -72,14 +70,12 @@ export default function EventDescription({ user, onSignOut }) {
   // Handler for registering user for this event
   const handleRegister = async () => {
     try {
-      // We need the user's token to authorize the request
       const token = localStorage.getItem("token");
       if (!token) {
         alert("You must be logged in to register for an event.");
         return;
       }
 
-      // Call the backend to register the user for the event
       const response = await fetch("http://localhost:5000/api/events/register", {
         method: "POST",
         headers: {
@@ -94,10 +90,8 @@ export default function EventDescription({ user, onSignOut }) {
         throw new Error(errorData.error || "Failed to register for event");
       }
 
-      // Optionally show a success message
       alert("Successfully registered for the event!");
-
-      // Navigate to the user dashboard
+      setIsRegistered(true); // Update registration status
       navigate("/dashboard");
     } catch (error) {
       console.error("Error registering for event:", error);
@@ -105,13 +99,41 @@ export default function EventDescription({ user, onSignOut }) {
     }
   };
 
-  // Get the sidebar via the singleton.
-  // The onSignOut callback triggers the quit confirmation modal.
+  // Handle feedback submission
+  const handleSubmitFeedback = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setFeedbackMessage("You must be logged in to submit feedback.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/api/events/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ eventId: currentEvent._id, rating }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setFeedbackMessage("Feedback submitted successfully!");
+        setRating(0); // Reset rating after submission
+      } else {
+        setFeedbackMessage(data.error || "Failed to submit feedback");
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      setFeedbackMessage("Error submitting feedback");
+    }
+  };
+
   const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
-      {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
@@ -120,7 +142,6 @@ export default function EventDescription({ user, onSignOut }) {
         {sidebar}
       </div>
 
-      {/* Main Content */}
       <div
         className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "ml-64" : "ml-0"
@@ -128,11 +149,8 @@ export default function EventDescription({ user, onSignOut }) {
       >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        {/* Event Details */}
         <div className="p-6 w-full max-w-screen-lg mx-0">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            {currentEvent.title}
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">{currentEvent.title}</h1>
           <hr className="mb-8 border-gray-300 w-full" />
 
           <p className="text-lg text-gray-700 mb-2">
@@ -147,16 +165,12 @@ export default function EventDescription({ user, onSignOut }) {
           <p className="text-lg text-gray-700 mb-2">
             <strong>Mode:</strong> {currentEvent.mode}
           </p>
-
-          {/* Show room number if mode is in-person or hybrid */}
-          {(currentEvent.mode === "in-person" ||
-            currentEvent.mode === "hybrid") && (
+          {(currentEvent.mode === "in-person" || currentEvent.mode === "hybrid") && (
             <p className="text-lg text-gray-700 mb-2">
               <strong>Room:</strong> {currentEvent.room}
             </p>
           )}
 
-          {/* Registration Info */}
           <p className="text-lg text-gray-700 mb-2">
             <strong>Registration Pricing:</strong>
             <ul className="mt-1 ml-6 list-disc list-inside space-y-1">
@@ -178,10 +192,7 @@ export default function EventDescription({ user, onSignOut }) {
                     ? `${currentEvent.registration.otherStudents} $CAD`
                     : "Not Set"}
                 </span>
-                <span className="text-red-500 font-semibold">
-                  {" "}
-                  (30% discount)
-                </span>
+                <span className="text-red-500 font-semibold"> (30% discount)</span>
               </li>
               <li>
                 <strong>Concordia Students:</strong>{" "}
@@ -190,29 +201,48 @@ export default function EventDescription({ user, onSignOut }) {
                     ? `${currentEvent.registration.regular} $CAD`
                     : "Not Set"}
                 </span>
-                <span>
-                  {currentEvent.registration.concordiaStudents ||
-                    "Not Set"}
-                </span>
+                <span>{currentEvent.registration.concordiaStudents || "Not Set"}</span>
               </li>
             </ul>
           </p>
 
-          {/* Description */}
           <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">
             Event Description
           </h2>
-          <p className="text-xl text-gray-700 leading-relaxed">
-            {currentEvent.description}
-          </p>
+          <p className="text-xl text-gray-700 leading-relaxed">{currentEvent.description}</p>
 
-          {/* Tags */}
-          <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">
-            Tags
-          </h2>
-          <p className="text-xl text-gray-700 leading-relaxed">
-            {currentEvent.tags.join(", ")}
-          </p>
+          <h2 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">Tags</h2>
+          <p className="text-xl text-gray-700 leading-relaxed">{currentEvent.tags.join(", ")}</p>
+
+          {/* Feedback Section (Visible only if registered) */}
+          {isRegistered && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-2">Rate This Event</h2>
+              <div className="flex gap-2 mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setRating(star)}
+                    className={`text-3xl ${
+                      rating >= star ? "text-yellow-400" : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleSubmitFeedback}
+                className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-700 transition"
+                disabled={!rating}
+              >
+                Submit Feedback
+              </button>
+              {feedbackMessage && (
+                <p className="mt-2 text-gray-700">{feedbackMessage}</p>
+              )}
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="mt-8 flex gap-4">
@@ -222,23 +252,22 @@ export default function EventDescription({ user, onSignOut }) {
             >
               Go Back to Search Events
             </button>
-
-            {/* Register & Pay */}
-            <button
-              onClick={() =>
-                navigate("/payment", {
-                  state: { event: currentEvent, user },
-                })
-              }
-              className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition"
-            >
-              Register & Pay
-            </button>
+            {!isRegistered && (
+              <button
+                onClick={() =>
+                  navigate("/payment", {
+                    state: { event: currentEvent, user },
+                  })
+                }
+                className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition"
+              >
+                Register & Pay
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Quit Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <QuitConfirmation

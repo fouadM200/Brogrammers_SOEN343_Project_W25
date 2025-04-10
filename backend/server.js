@@ -8,12 +8,15 @@ const eventRoutes = require("./routes/eventRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const User = require("./models/User");
+const analyticsRoutes = require("./routes/analyticsRoutes");
+const messageRoutes = require("./routes/message");
 const chatRoutes = require("./routes/chatRoutes");
 
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use("/api/messages", messageRoutes);
 
 mongoose
   .connect("mongodb+srv://stevengourgy:1234@cluster0.weyt6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
@@ -53,6 +56,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/chat", chatRoutes);
 
 

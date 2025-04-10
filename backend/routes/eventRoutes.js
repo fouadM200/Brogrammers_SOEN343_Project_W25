@@ -9,6 +9,7 @@ const {
   leaveEvent,
   getEventRegistrations,
   updateEvent,  
+  submitFeedback,
 } = require("../controllers/eventController");
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.delete("/:id", authMiddleware, deleteEvent);
 router.post("/register", authMiddleware, registerForEvent);
 router.post("/leave", authMiddleware, leaveEvent);
 router.get("/registrations/:eventId", authMiddleware, getEventRegistrations);
+router.post("/feedback", authMiddleware, submitFeedback);
 
 module.exports = router;

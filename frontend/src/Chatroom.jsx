@@ -156,7 +156,6 @@ const Chatroom = ({ user, onSignOut }) => {
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
-      {/* Sidebar */}
       <div
         className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
@@ -165,7 +164,6 @@ const Chatroom = ({ user, onSignOut }) => {
         <UserSideMenuBar user={user} onSignOut={() => setShowConfirm(true)} />
       </div>
 
-      {/* Main Content */}
       <div
         className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ${
           isSidebarOpen ? "ml-64" : "ml-0"

@@ -17,6 +17,8 @@ export default function UserDashboard() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showLeaveSuccess, setShowLeaveSuccess] = useState(false);
   const [eventToLeave, setEventToLeave] = useState(null);
+  const [rating, setRating] = useState({}); // Track ratings per event
+  const [feedbackMessage, setFeedbackMessage] = useState({}); // Feedback messages per event
 
   const navigate = useNavigate();
 
@@ -25,7 +27,6 @@ export default function UserDashboard() {
     document.title = "SEES | User dashboard"; // Customize your title here
   }, []);
 
-  // 1) Fetch user profile & all events from the backend
   useEffect(() => {
     fetchProfileAndEvents();
   }, []);
@@ -34,14 +35,12 @@ export default function UserDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      // Fetch user profile (includes registeredEvents)
       const profileRes = await fetch("http://localhost:5000/api/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const userData = await profileRes.json();
       setCurrentUser(userData);
 
-      // Fetch all events
       const eventsRes = await fetch("http://localhost:5000/api/events");
       const eventsData = await eventsRes.json();
       setAllEvents(eventsData);
@@ -50,7 +49,6 @@ export default function UserDashboard() {
     }
   }
 
-  // 2) Compute upcoming vs recommended events in memory
   const upcomingEvents = allEvents.filter((evt) =>
     currentUser?.registeredEvents?.some(
       (reg) => reg._id.toString() === evt._id.toString()
@@ -69,7 +67,6 @@ export default function UserDashboard() {
     return evt.tags.some((tag) => userInterests.includes(tag.toLowerCase()));
   });
 
-  // 3) Register for event
   async function handleRegister(eventId) {
     try {
       const token = localStorage.getItem("token");
@@ -87,7 +84,6 @@ export default function UserDashboard() {
     }
   }
 
-  // 4) Leave event
   async function handleLeaveConfirmed(eventId) {
     try {
       const token = localStorage.getItem("token");
@@ -106,12 +102,49 @@ export default function UserDashboard() {
       console.error("Error leaving event:", error);
     }
   }
-  
+
+  async function handleSubmitFeedback(eventId) {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/events/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ eventId, rating: rating[eventId] || 0 }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setFeedbackMessage((prev) => ({
+          ...prev,
+          [eventId]: "Feedback submitted successfully!",
+        }));
+        setRating((prev) => ({ ...prev, [eventId]: 0 })); // Reset rating
+      } else {
+        setFeedbackMessage((prev) => ({
+          ...prev,
+          [eventId]: data.error || "Failed to submit feedback",
+        }));
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      setFeedbackMessage((prev) => ({
+        ...prev,
+        [eventId]: "Error submitting feedback",
+      }));
+    }
+  }
+
+  // Check if the event is in the past
+  const isEventPast = (eventDate) => {
+    return new Date(eventDate) < new Date();
+  };
+
   const sidebar = SidebarSingleton.getInstance(currentUser, () => setShowConfirm(true)).getSidebar();
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
-      {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
@@ -120,7 +153,6 @@ export default function UserDashboard() {
         {sidebar}
       </div>
 
-      {/* Main Content */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "ml-64" : "ml-0"
@@ -135,7 +167,6 @@ export default function UserDashboard() {
           <p className="text-gray-600">Welcome to your Dashboard.</p>
           <hr className="my-2 border-gray-300" />
 
-          {/* Upcoming Events Section */}
           <h2 className="text-2xl font-semibold mt-6">Your Upcoming Events</h2>
           <hr className="my-2 border-gray-300" />
           <div className="mt-6 grid grid-cols-1 gap-4">
@@ -171,8 +202,7 @@ export default function UserDashboard() {
                         })}`}
                     </p>
                     <p className="text-gray-500">
-                      Mode:{" "}
-                      {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
+                      Mode: {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
                       {(event.mode === "in-person" || event.mode === "hybrid") &&
                       event.room
                         ? ` | Room: ${event.room}`
@@ -210,6 +240,46 @@ export default function UserDashboard() {
                     >
                       Leave Event
                     </button>
+                    {/* Feedback Section */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onClick={() =>
+                              setRating((prev) => ({ ...prev, [event._id]: star }))
+                            }
+                            className={`text-2xl ${
+                              (rating[event._id] || 0) >= star
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            } ${!isEventPast(event.date) ? "cursor-not-allowed opacity-50" : ""}`}
+                            disabled={!isEventPast(event.date)}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        className={`bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 ${
+                          !isEventPast(event.date) ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={() => handleSubmitFeedback(event._id)}
+                        disabled={!isEventPast(event.date) || !rating[event._id]}
+                      >
+                        Give Feedback
+                      </button>
+                    </div>
+                    {feedbackMessage[event._id] && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {feedbackMessage[event._id]}
+                      </p>
+                    )}
+                    {!isEventPast(event.date) && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Feedback available after event ends
+                      </p>
+                    )}
                   </div>
                 </div>
               ))
@@ -218,7 +288,6 @@ export default function UserDashboard() {
             )}
           </div>
 
-          {/* Events You Might Be Interested In */}
           <h2 className="text-2xl font-semibold mt-6">
             Events You Might Be Interested In
           </h2>
@@ -256,8 +325,7 @@ export default function UserDashboard() {
                       })}
                     </p>
                     <p className="text-gray-500">
-                      Mode:{" "}
-                      {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
+                      Mode: {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
                       {(event.mode === "in-person" || event.mode === "hybrid") &&
                       event.room
                         ? ` | Room: ${event.room}`
@@ -281,7 +349,6 @@ export default function UserDashboard() {
         </main>
       </div>
 
-      {/* Logout Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <QuitConfirmation
@@ -294,7 +361,6 @@ export default function UserDashboard() {
         </div>
       )}
 
-      {/* Access Code Overlay */}
       {showAccessCode && selectedEvent && currentUser && (
         <DisplayAccessCode
           event={selectedEvent}
@@ -303,7 +369,6 @@ export default function UserDashboard() {
         />
       )}
 
-      {/* Leave Meeting Confirmation Modal */}
       {showLeaveConfirm && eventToLeave && (
         <LeaveMeetingConfirmationOverlay
           eventName={eventToLeave.title}
@@ -312,7 +377,6 @@ export default function UserDashboard() {
         />
       )}
 
-      {/* Leave Success Overlay */}
       {showLeaveSuccess && (
         <LeaveMeetingSuccessOverlay onClose={() => setShowLeaveSuccess(false)} />
       )}

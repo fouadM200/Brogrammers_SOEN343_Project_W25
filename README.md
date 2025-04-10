@@ -37,6 +37,13 @@ npm install lucide-react swiper
 npm install recharts
 ```
 
+```bash
+npm install jspdf jspdf-autotable
+```
+
+```bash
+npm install html2canvas
+```
 ## Run it!
 
 ```bash

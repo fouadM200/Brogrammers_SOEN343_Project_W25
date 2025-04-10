@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Payment = require("../models/Payment");
 const Notifier = require("../utils/notifier"); 
 const EmailNotifier = require("../utils/emailNotifier"); 
+const Feedback = require("../models/Feedback");
 // Create a new event
 exports.createEvent = async (req, res) => {
   try {
@@ -195,6 +196,43 @@ exports.updateEvent = async (req, res) => {
     res.json({ message: "Event updated successfully", event });
   } catch (error) {
     console.error("Update event error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.submitFeedback = async (req, res) => {
+  try {
+    const { userId } = req.user; // From authMiddleware
+    const { eventId, rating } = req.body;
+
+    // Validate input
+    if (!eventId || !rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Event ID and rating (1-5) are required" });
+    }
+
+    // Check if user is registered for the event
+    const user = await User.findById(userId);
+    if (!user || !user.registeredEvents.includes(eventId)) {
+      return res.status(403).json({ error: "You are not registered for this event" });
+    }
+
+    // Check if feedback already exists
+    const existingFeedback = await Feedback.findOne({ userId, eventId });
+    if (existingFeedback) {
+      return res.status(400).json({ error: "Feedback already submitted for this event" });
+    }
+
+    // Save feedback
+    const feedback = new Feedback({
+      eventId,
+      userId,
+      rating,
+    });
+    await feedback.save();
+
+    res.status(201).json({ message: "Feedback submitted successfully" });
+  } catch (error) {
+    console.error("Submit feedback error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
