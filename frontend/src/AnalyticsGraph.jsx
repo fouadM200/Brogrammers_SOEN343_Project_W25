@@ -250,17 +250,18 @@ export default function AnalyticsGraph({ user }) {
           </section>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <section className="bg-white p-4 shadow-md rounded-lg">
-              <h2 className="text-2xl font-semibold mb-2">Feedback Summary</h2>
-              {feedbackData.avgRating ? (
-                <p className="text-gray-700">
-                  Average Rating: {feedbackData.avgRating.toFixed(2)} ⭐️ <br />
-                  Total Feedback Entries: {feedbackData.feedbackCount || 0}
-                </p>
-              ) : (
-                <p>No feedback data available.</p>
-              )}
-            </section>
+          <section className="bg-white p-4 shadow-md rounded-lg">
+  <h2 className="text-2xl font-semibold mb-2">Feedback Summary</h2>
+  {feedbackData.avgRating ? (
+    <p className="text-gray-700">
+      Average Rating: {feedbackData.avgRating.toFixed(1)} / 5{" "}
+      {"★".repeat(Math.round(feedbackData.avgRating))} <br />
+      Total Feedback Entries: {feedbackData.feedbackCount || 0}
+    </p>
+  ) : (
+    <p>No feedback data available.</p>
+  )}
+</section>
 
             <section className="bg-white p-4 shadow-md rounded-lg">
               <h2 className="text-2xl font-semibold mb-2">Session Engagement</h2>
