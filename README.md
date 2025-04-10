@@ -33,6 +33,13 @@ npm install
 npm install lucide-react swiper
 ```
 
+```bash
+npm install jspdf jspdf-autotable
+```
+
+```bash
+npm install html2canvas
+```
 ## Run it!
 
 ```bash

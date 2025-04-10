@@ -19,4 +19,3 @@ class Notifier {
   }
   
   module.exports = Notifier;
-  
