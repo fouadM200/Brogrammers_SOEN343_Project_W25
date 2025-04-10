@@ -17,7 +17,7 @@ export default function UserSideMenuBar({ user, onSignOut }) {
   // Navigation links
   const navigation = [
     { name: "Dashboard", href: ["/dashboard", "/online_event_access"] },
-    { name: "Search Events", href: "/search_events" },
+    { name: "Search Events", href: ["/search_events", "/event_description", "/payment"] },
     { name: "Chatroom", href: location.pathname.startsWith("/chatroom") ? "/chatroom" : "/select_chatroom" }
   ];
 

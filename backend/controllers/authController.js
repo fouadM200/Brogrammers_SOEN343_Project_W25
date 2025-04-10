@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
 
     // If we get here, the password matched
     const token = jwt.sign(
-      { userId: user._id, role: user.role }, 
+      { userId: user._id, role: user.role, name: user.name },
       "your_secret_key",
       { expiresIn: "1h" }
     );

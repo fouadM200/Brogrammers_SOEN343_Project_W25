@@ -5,6 +5,11 @@ import { useNavigate } from "react-router-dom";
 export default function SignOut({ onSignOut }) {
   const navigate = useNavigate();
 
+    // Set the browser tab title when the component mounts
+    useEffect(() => {
+      document.title = "SEES | Sign in"; // Customize your title here
+    }, []);
+
   useEffect(() => {
     // Remove token & user from localStorage
     localStorage.removeItem("token");

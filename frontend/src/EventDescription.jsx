@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Add useEffect
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SidebarSingleton from "./SidebarSingleton";
 import HeaderMenuBar from "./HeaderMenuBar";
@@ -47,7 +47,15 @@ export default function EventDescription({ user, onSignOut }) {
     tags: event?.tags || fallbackEvent.tags,
   };
 
-  const displayDate = new Date(currentEvent.date).toLocaleDateString() || "Unknown Date";
+  // Set the browser tab title using the event title
+  useEffect(() => {
+    document.title = `SEES | ${currentEvent.title}`;
+  }, [currentEvent.title]);
+
+  // Convert date/time for display
+  const displayDate =
+    new Date(currentEvent.date).toLocaleDateString() || "Unknown Date";
+
   const formatTo12Hour = (time) => {
     return new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
       hour: "numeric",
@@ -59,27 +67,7 @@ export default function EventDescription({ user, onSignOut }) {
     ? `${formatTo12Hour(currentEvent.startTime)} - ${formatTo12Hour(currentEvent.endTime)}`
     : formatTo12Hour(currentEvent.startTime);
 
-  // Check if the user is registered for the event
-  useEffect(() => {
-    const checkRegistration = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token || !currentEvent._id) return;
-
-        const response = await fetch("http://localhost:5000/api/users/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const userData = await response.json();
-        if (response.ok && userData.registeredEvents.includes(currentEvent._id)) {
-          setIsRegistered(true);
-        }
-      } catch (error) {
-        console.error("Error checking registration:", error);
-      }
-    };
-    checkRegistration();
-  }, [currentEvent._id]);
-
+  // Handler for registering user for this event
   const handleRegister = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -147,7 +135,7 @@ export default function EventDescription({ user, onSignOut }) {
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >

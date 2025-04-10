@@ -10,6 +10,8 @@ const adminRoutes = require("./routes/adminRoutes");
 const User = require("./models/User");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const messageRoutes = require("./routes/message");
+const chatRoutes = require("./routes/chatRoutes");
+
 
 const app = express();
 app.use(express.json());
@@ -55,6 +57,8 @@ app.use("/api/events", eventRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/chat", chatRoutes);
+
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

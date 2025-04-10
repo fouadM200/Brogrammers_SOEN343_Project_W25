@@ -16,6 +16,10 @@ const SearchEvents = ({ user }) => {
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    document.title = "SEES | Search events"; // Customize your title here
+  }, []);
+
   // Fetch the latest user profile from the backend.
   useEffect(() => {
     const fetchProfile = async () => {
@@ -81,7 +85,7 @@ const SearchEvents = ({ user }) => {
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >

@@ -1,4 +1,3 @@
-// src/UserDashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SidebarSingleton from "./SidebarSingleton";
@@ -22,6 +21,11 @@ export default function UserDashboard() {
   const [feedbackMessage, setFeedbackMessage] = useState({}); // Feedback messages per event
 
   const navigate = useNavigate();
+
+  // Set the browser tab title when the component mounts
+  useEffect(() => {
+    document.title = "SEES | User dashboard"; // Customize your title here
+  }, []);
 
   useEffect(() => {
     fetchProfileAndEvents();
@@ -142,7 +146,7 @@ export default function UserDashboard() {
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >

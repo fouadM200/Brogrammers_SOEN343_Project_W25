@@ -1,7 +1,6 @@
-// src/EditEvent.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import SidebarSingleton from "./SidebarSingleton"; // Use singleton instead of direct OrganizerSideMenuBar
+import SidebarSingleton from "./SidebarSingleton";
 import HeaderMenuBar from "./HeaderMenuBar";
 import QuitConfirmation from "./QuitConfirmation";
 import CancelCreateNewEvent from "./CancelCreateNewEvent";
@@ -17,7 +16,7 @@ const EditEvent = () => {
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
-  
+
   // Initialize eventDetails from the event passed via location.state
   const [eventDetails, setEventDetails] = useState(() => ({
     title: event?.title || "",
@@ -28,7 +27,7 @@ const EditEvent = () => {
     mode: event?.mode || "online",
     room: event?.room || "",
     location: event?.location || "",
-    zoomLink: event?.zoomLink || "", 
+    zoomLink: event?.zoomLink || "",
     registration: event?.registration || {
       regular: "",
       otherStudents: "",
@@ -37,6 +36,11 @@ const EditEvent = () => {
     description: event?.description || "",
     tags: event?.tags || [],
   }));
+
+  // Set the tab title dynamically
+  useEffect(() => {
+    document.title = "SEES | Edit Event";
+  }, []);
 
   useEffect(() => {
     if (!event) {
@@ -94,7 +98,7 @@ const EditEvent = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(eventDetails),
       });
@@ -111,14 +115,13 @@ const EditEvent = () => {
   };
 
   // Get the sidebar via the singleton.
-  // This will render the organizer sidebar based on the provided user data.
   const sidebar = SidebarSingleton.getInstance(user, () => setShowConfirm(true)).getSidebar();
 
   return (
     <div className="flex h-screen transition-all duration-300 ease-in-out relative">
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 min-h-screen w-64 bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
@@ -127,13 +130,13 @@ const EditEvent = () => {
 
       {/* Main Content */}
       <div
-        className={`flex flex-col flex-1 bg-gray-100 transition-all duration-300 ease-in-out ${
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
         <HeaderMenuBar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <div className="p-6">
+        <main className="p-6 bg-gray-100 flex-1">
           <h1 className="text-3xl font-bold text-left mb-2">Edit Event</h1>
           <hr className="border-gray-300 mb-6" />
 
@@ -242,7 +245,9 @@ const EditEvent = () => {
               </div>
             )}
             
-            {(eventDetails.mode.toLowerCase() === "online" || eventDetails.mode.toLowerCase() === "hybrid") && (
+            {/* Zoom Link (for online/hybrid) */}
+            {(eventDetails.mode.toLowerCase() === "online" ||
+              eventDetails.mode.toLowerCase() === "hybrid") && (
               <div className="mb-4">
                 <label className="block mb-1 font-medium">Zoom Link:</label>
                 <input
@@ -312,7 +317,7 @@ const EditEvent = () => {
                 name="tags"
                 value={eventDetails.tags.join(", ")}
                 onChange={(e) => {
-                  const tagsArray = e.target.value.split(",").map(tag => tag.trim());
+                  const tagsArray = e.target.value.split(",").map((tag) => tag.trim());
                   setEventDetails((prev) => ({
                     ...prev,
                     tags: tagsArray,
@@ -339,7 +344,7 @@ const EditEvent = () => {
               </button>
             </div>
           </div>
-        </div>
+        </main>
       </div>
 
       {/* Overlays */}

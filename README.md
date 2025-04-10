@@ -34,6 +34,10 @@ npm install lucide-react swiper
 ```
 
 ```bash
+npm install recharts
+```
+
+```bash
 npm install jspdf jspdf-autotable
 ```
 
@@ -58,6 +62,10 @@ npm install
 ```
 ```bash
 npm install nodemailer
+```
+```bash
+npm install node-fetch
+npm install node-fetch@2
 ```
 ## Run it!
 
