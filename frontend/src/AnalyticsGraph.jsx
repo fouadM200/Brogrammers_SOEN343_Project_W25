@@ -26,7 +26,7 @@ export default function AnalyticsGraph({ user }) {
   const [registrations, setRegistrations] = useState([]);
   const [totalData, setTotalData] = useState([]);
   const [feedbackData, setFeedbackData] = useState([]);
-  const [engagementData, setEngagementData] = useState([]);
+  const [engagementData, setEngagementData] = useState({ messageCount: 0 }); // Changed initial value
   const lineChartRef = useRef(null);
   const barChartRef = useRef(null);
 
@@ -66,18 +66,21 @@ export default function AnalyticsGraph({ user }) {
             setFeedbackData(filtered || {});
           });
 
-        fetch("http://localhost:5000/api/analytics/engagement", {
+        // Changed to fetch chat messages and count them
+        const messagesRes = await fetch(`http://localhost:5000/api/chat?eventId=${eventId}`, {
           headers: { Authorization: `Bearer ${token}` },
-        })
-          .then(res => res.json())
-          .then(data => {
-            const filtered = data.find(item => item._id === eventId);
-            setEngagementData(filtered || {});
-          });
+        });
+        if (messagesRes.ok) {
+          const messages = await messagesRes.json();
+          setEngagementData({ messageCount: messages.length });
+        } else {
+          setEngagementData({ messageCount: 0 });
+        }
       } catch (err) {
         console.error("Error fetching analytics:", err);
         setRegistrations([]);
         setTotalData([]);
+        setEngagementData({ messageCount: 0 }); // Reset on error
       }
     };
 
@@ -113,7 +116,7 @@ export default function AnalyticsGraph({ user }) {
     doc.text(`Average Rating: ${feedbackData?.avgRating?.toFixed(2) || "0"} ⭐️`, 14, y + 10);
     doc.text(`Total Feedback Entries: ${feedbackData?.feedbackCount || "0"}`, 14, y + 20);
     doc.text("Session Engagement:", 14, y + 35);
-    doc.text(`Total Messages Sent: ${engagementData?.messageCount || "0"}`, 14, y + 45);
+    doc.text(`Total Messages Sent: ${engagementData.messageCount}`, 14, y + 45); // Updated to match state
 
     const addChartToPDF = async (ref, yPos) => {
       if (!ref.current) return;
@@ -260,7 +263,7 @@ export default function AnalyticsGraph({ user }) {
               )}
             </section>
 
-            {/* Updated Session Engagement Section */}
+            {/* Session Engagement Section (No Change Needed Here) */}
             <section className="bg-white p-4 shadow-md rounded-lg">
               <h2 className="text-2xl font-semibold mb-2">Session Engagement</h2>
               {engagementData.messageCount ? (
